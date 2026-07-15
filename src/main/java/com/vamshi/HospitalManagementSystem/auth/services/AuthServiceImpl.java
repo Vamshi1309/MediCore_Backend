@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,7 @@ import com.vamshi.HospitalManagementSystem.auth.dto.LoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenResponse;
 import com.vamshi.HospitalManagementSystem.auth.dto.RegisterRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.UserProfileResponse;
 import com.vamshi.HospitalManagementSystem.auth.entities.RefreshTokenEntity;
 import com.vamshi.HospitalManagementSystem.auth.repositories.RefreshTokenRepository;
 import com.vamshi.HospitalManagementSystem.auth.security.JwtUtil;
@@ -205,5 +207,23 @@ public class AuthServiceImpl implements AuthService {
                                         accessToken, remainingTime);
                 }
 
+        }
+
+        @Override
+        public UserProfileResponse getMe() {
+                String phoneNumber = SecurityContextHolder.getContext()
+                                .getAuthentication()
+                                .getName();
+                UserEntity user = userRepository
+                                .findByPhoneNumber(phoneNumber)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "User not found"));
+
+                return UserProfileResponse.builder()
+                                .id(user.getId())
+                                .name(user.getName())
+                                .phoneNumber(user.getPhoneNumber())
+                                .role(user.getRole().name())
+                                .build();
         }
 }

@@ -2,6 +2,7 @@ package com.vamshi.HospitalManagementSystem.auth.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import com.vamshi.HospitalManagementSystem.auth.dto.LoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenResponse;
 import com.vamshi.HospitalManagementSystem.auth.dto.RegisterRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.UserProfileResponse;
 import com.vamshi.HospitalManagementSystem.auth.services.AuthService;
 import com.vamshi.HospitalManagementSystem.common.ApiResponse;
 
@@ -74,5 +76,15 @@ public class AuthController {
 
                 return ResponseEntity.ok(
                                 ApiResponse.success("Logged out successfully"));
+        }
+
+        @GetMapping("/me")
+        public ResponseEntity<ApiResponse<UserProfileResponse>> getMe() {
+
+                UserProfileResponse response = authService.getMe();
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "User fetched successfully", response));
         }
 }
