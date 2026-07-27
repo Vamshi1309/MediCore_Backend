@@ -7,10 +7,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LoginRequest {
-    
-    @NotBlank(message = "phoneNumber is required")
-    private String phoneNumber;
+public class StaffLoginRequest {
+
+    @NotBlank(message = "Staff ID is required")
+    private String staffId;
 
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be of 6 Characters")

@@ -11,6 +11,7 @@ import com.vamshi.HospitalManagementSystem.admin.dtos.AssignRoleRequest;
 import com.vamshi.HospitalManagementSystem.admin.dtos.CreateUserRequest;
 import com.vamshi.HospitalManagementSystem.admin.dtos.UpdateUserStatusRequest;
 import com.vamshi.HospitalManagementSystem.admin.dtos.UserSummaryResponse;
+import com.vamshi.HospitalManagementSystem.common.enums.Role;
 import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
@@ -37,22 +38,30 @@ public class AdminServiceImpl implements AdminService {
         private final ReceptionistProfileRepository receptionistProfileRepository;
         private final PharmacistProfileRepository pharmacistProfileRepository;
         private final RadiologistProfileRepository radiologistProfileRepository;
+        private final StaffIdGeneratorService staffIdGeneratorService;
 
         @Override
         @Transactional
         public UserSummaryResponse createUser(CreateUserRequest request) {
-                if (userRepository.existsByphoneNumber(request.getPhoneNumber())) {
-                        throw new ResourceAlreadyExistsException(
-                                        "Phone Number Already Exists");
+                if (request.getRole() == Role.PATIENT) {
+                        throw new IllegalArgumentException("Patients must self-register, not be created by admin");
                 }
+
+                if (userRepository.existsByEmail(request.getEmail())) {
+                        throw new ResourceAlreadyExistsException("Email Already Exists");
+                }
+
+                String generatedStaffId = staffIdGeneratorService.generateStaffId(request.getRole());
+                String rawTempPassword = generateTempPassword();
 
                 UserEntity user = UserEntity.builder()
                                 .name(request.getName())
                                 .email(request.getEmail())
-                                .password(passwordEncoder.encode(request.getPassword()))
-                                .phoneNumber(request.getPhoneNumber())
+                                .password(passwordEncoder.encode(rawTempPassword))
+                                .staffId(generatedStaffId)
                                 .role(request.getRole())
                                 .isActive(true)
+                                .mustChangePassword(true)
                                 .build();
 
                 UserEntity savedUser = userRepository.save(user);
@@ -83,7 +92,9 @@ public class AdminServiceImpl implements AdminService {
                         }
                 }
 
-                return mapToResponse(savedUser);
+                UserSummaryResponse response = mapToResponse(savedUser);
+                response.setTempPassword(rawTempPassword);
+                return response;
         }
 
         @Override
@@ -106,9 +117,11 @@ public class AdminServiceImpl implements AdminService {
                 UserEntity user = userRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("User Not found"));
 
-                user.setActive(request.getIsActive());
+                user.setIsActive(request.getIsActive());
 
-                return mapToResponse(user);
+                UserEntity updated = userRepository.save(user);
+
+                return mapToResponse(updated);
         }
 
         @Override
@@ -120,14 +133,19 @@ public class AdminServiceImpl implements AdminService {
                 return mapToResponse(userRepository.save(user));
         }
 
+        private String generateTempPassword() {
+                return UUID.randomUUID().toString().substring(0, 8);
+        }
+
         private UserSummaryResponse mapToResponse(UserEntity user) {
                 return UserSummaryResponse.builder()
                                 .userId(user.getId())
                                 .name(user.getName())
                                 .email(user.getEmail())
                                 .phoneNumber(user.getPhoneNumber())
+                                .staffId(user.getStaffId())
                                 .role(user.getRole())
-                                .isActive(user.isActive())
+                                .isActive(user.getIsActive())
                                 .createdAt(user.getCreatedAt())
                                 .build();
         }

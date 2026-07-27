@@ -13,10 +13,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.vamshi.HospitalManagementSystem.auth.dto.AuthResponse;
-import com.vamshi.HospitalManagementSystem.auth.dto.LoginRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.ChangePasswordRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.PatientLoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenResponse;
 import com.vamshi.HospitalManagementSystem.auth.dto.RegisterRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.StaffLoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.UserProfileResponse;
 import com.vamshi.HospitalManagementSystem.auth.entities.RefreshTokenEntity;
 import com.vamshi.HospitalManagementSystem.auth.repositories.RefreshTokenRepository;
@@ -59,7 +61,6 @@ public class AuthServiceImpl implements AuthService {
                 UserEntity user = new UserEntity();
 
                 user.setName(request.getName());
-                user.setEmail(request.getEmail());
                 user.setPassword(passwordEncoder.encode(request.getPassword()));
                 user.setPhoneNumber(request.getPhoneNumber());
                 user.setRole(Role.PATIENT);
@@ -91,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         @Override
-        public AuthResponse login(LoginRequest request) {
+        public AuthResponse patientLogin(PatientLoginRequest request) {
 
                 authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(request.getPhoneNumber(),
@@ -110,6 +111,32 @@ public class AuthServiceImpl implements AuthService {
                 AuthResponse response = new AuthResponse();
                 response.setId(user.getId());
                 response.setName(user.getName());
+                response.setRole(user.getRole());
+                response.setAccessToken(accessToken);
+                response.setRefreshToken(refreshToken);
+
+                return response;
+        }
+
+        @Override
+        public AuthResponse staffLogin(StaffLoginRequest request) {
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getStaffId(),
+                                request.getPassword()));
+
+                UserEntity user = userRepository.findByStaffIdAndRoleNot(
+                                request.getStaffId(), Role.PATIENT)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not exist"));
+
+                UserDetails userDetails = buildUserDetails(user);
+
+                String accessToken = jwtUtil.generateAccessToken(userDetails);
+                String refreshToken = generateAndSaveRefreshToken(
+                                user, userDetails);
+
+                AuthResponse response = new AuthResponse();
+                response.setId(user.getId());
+                response.setName(user.getName());
+                response.setMustChangePassword(user.getMustChangePassword());
                 response.setRole(user.getRole());
                 response.setAccessToken(accessToken);
                 response.setRefreshToken(refreshToken);
@@ -165,11 +192,15 @@ public class AuthServiceImpl implements AuthService {
         }
 
         private UserDetails buildUserDetails(UserEntity user) {
+                String principal = user.getRole() == Role.PATIENT
+                                ? user.getPhoneNumber()
+                                : user.getStaffId();
+
                 return new User(
-                                user.getPhoneNumber(),
+                                principal,
                                 user.getPassword(),
                                 List.of(new SimpleGrantedAuthority(
-                                                user.getRole().name())));
+                                                "ROLE_" + user.getRole().name())));
         }
 
         // ── Helper — generate + save refresh token ───────────
@@ -211,13 +242,13 @@ public class AuthServiceImpl implements AuthService {
 
         @Override
         public UserProfileResponse getMe() {
-                String phoneNumber = SecurityContextHolder.getContext()
+                String identifier = SecurityContextHolder.getContext()
                                 .getAuthentication()
                                 .getName();
-                UserEntity user = userRepository
-                                .findByPhoneNumber(phoneNumber)
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "User not found"));
+
+                UserEntity user = userRepository.findByPhoneNumber(identifier)
+                                .or(() -> userRepository.findByStaffIdAndRoleNot(identifier, Role.PATIENT))
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
                 return UserProfileResponse.builder()
                                 .id(user.getId())
@@ -225,5 +256,24 @@ public class AuthServiceImpl implements AuthService {
                                 .phoneNumber(user.getPhoneNumber())
                                 .role(user.getRole().name())
                                 .build();
+        }
+
+        @Override
+        public void changePassword(ChangePasswordRequest request) {
+                String identifier = SecurityContextHolder.getContext()
+                                .getAuthentication()
+                                .getName();
+
+                UserEntity user = userRepository.findByPhoneNumber(identifier)
+                                .or(() -> userRepository.findByStaffIdAndRoleNot(identifier, Role.PATIENT))
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+                if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                        throw new IllegalArgumentException("Current password is incorrect");
+                }
+
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                user.setMustChangePassword(false);
+                userRepository.save(user);
         }
 }

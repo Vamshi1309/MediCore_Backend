@@ -39,14 +39,15 @@ public class UserEntity {
     private String name;
 
     @Email
-    @NotBlank
     @Column(unique = true)
     private String email;
 
     @NotBlank
     private String password;
 
-    @NotBlank
+    @Column(unique = true)
+    private String staffId;
+
     @Column(unique = true)
     private String phoneNumber;
 
@@ -54,7 +55,11 @@ public class UserEntity {
     @NotNull
     private Role role;
 
-    private boolean isActive = true;
+    @Builder.Default
+    private Boolean mustChangePassword = false;
+
+    @Builder.Default
+    private Boolean isActive = true;
 
     private LocalDateTime createdAt;
 

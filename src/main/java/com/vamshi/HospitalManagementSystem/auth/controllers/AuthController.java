@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vamshi.HospitalManagementSystem.auth.dto.AuthResponse;
-import com.vamshi.HospitalManagementSystem.auth.dto.LoginRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.ChangePasswordRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.PatientLoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenResponse;
 import com.vamshi.HospitalManagementSystem.auth.dto.RegisterRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.StaffLoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.UserProfileResponse;
+import com.vamshi.HospitalManagementSystem.auth.security.UserDetailsServiceImpl;
 import com.vamshi.HospitalManagementSystem.auth.services.AuthService;
 import com.vamshi.HospitalManagementSystem.common.ApiResponse;
 
@@ -41,9 +44,21 @@ public class AuthController {
 
         @PostMapping("/login")
         public ResponseEntity<ApiResponse<AuthResponse>> login(
-                        @RequestBody @Valid LoginRequest request) {
+                        @RequestBody @Valid PatientLoginRequest request) {
 
-                AuthResponse response = authService.login(request);
+                AuthResponse response = authService.patientLogin(request);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                                .body(ApiResponse.success(
+                                                "Login successful",
+                                                response));
+        }
+
+        @PostMapping("/staff/login")
+        public ResponseEntity<ApiResponse<AuthResponse>> staffLogin(
+                        @RequestBody @Valid StaffLoginRequest request) {
+
+                AuthResponse response = authService.staffLogin(request);
 
                 return ResponseEntity.status(HttpStatus.OK)
                                 .body(ApiResponse.success(
@@ -86,5 +101,15 @@ public class AuthController {
                 return ResponseEntity.ok(
                                 ApiResponse.success(
                                                 "User fetched successfully", response));
+        }
+
+        @PostMapping("/change-password")
+        public ResponseEntity<ApiResponse<Void>> changePassword(
+                        @RequestBody @Valid ChangePasswordRequest request) {
+
+                authService.changePassword(request);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success("Password changed successfully"));
         }
 }

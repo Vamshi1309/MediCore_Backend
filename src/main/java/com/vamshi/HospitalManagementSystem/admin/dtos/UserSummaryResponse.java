@@ -22,9 +22,13 @@ public class UserSummaryResponse {
 
     private String phoneNumber;
 
+    private String staffId;
+
     private Role role;
 
     private Boolean isActive;
 
     private LocalDateTime createdAt;
+
+    private String tempPassword;
 }
