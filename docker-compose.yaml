@@ -1,6 +1,6 @@
 services:
   backend:
-    build: .
+    image: ghcr.io/vamshi1309/hospitalmanagementsystem-backend:latest
     container_name: hosptial-backend
 
     ports:
