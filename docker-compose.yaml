@@ -1,7 +1,7 @@
 services:
   backend:
     build: .
-    conatiner_name: hosptial-backend
+    container_name: hosptial-backend
 
     ports:
       - "8080:8080"
@@ -42,4 +42,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  - postgres_data:/var/lib/postgresql/data
+  postgres_data:
