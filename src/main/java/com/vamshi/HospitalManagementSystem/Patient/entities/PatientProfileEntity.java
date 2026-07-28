@@ -1,6 +1,5 @@
 package com.vamshi.HospitalManagementSystem.patient.entities;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;

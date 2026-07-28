@@ -16,6 +16,10 @@ public class AuthResponse {
 
     private UUID id;
 
+    private String phoneNumber;
+
+    private String staffId;
+
     private Role role;
 
     private String name;

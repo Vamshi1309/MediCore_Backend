@@ -46,9 +46,6 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .requestMatchers("/api/admin/**")
                                                 .hasRole("ADMIN")
-                                                .anyRequest().authenticated()
-                                                .requestMatchers("/api/admin/**")
-                                                .hasRole("ADMIN")
                                                 .requestMatchers(HttpMethod.POST,
                                                                 "/api/appointments")
                                                 .hasAnyRole("RECEPTIONIST", "PATIENT")

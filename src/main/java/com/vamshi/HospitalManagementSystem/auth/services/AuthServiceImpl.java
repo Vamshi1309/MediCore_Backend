@@ -111,6 +111,7 @@ public class AuthServiceImpl implements AuthService {
                 AuthResponse response = new AuthResponse();
                 response.setId(user.getId());
                 response.setName(user.getName());
+                response.setPhoneNumber(user.getPhoneNumber());
                 response.setRole(user.getRole());
                 response.setAccessToken(accessToken);
                 response.setRefreshToken(refreshToken);
@@ -137,6 +138,7 @@ public class AuthServiceImpl implements AuthService {
                 response.setId(user.getId());
                 response.setName(user.getName());
                 response.setMustChangePassword(user.getMustChangePassword());
+                response.setStaffId(user.getStaffId());
                 response.setRole(user.getRole());
                 response.setAccessToken(accessToken);
                 response.setRefreshToken(refreshToken);

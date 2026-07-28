@@ -16,7 +16,6 @@ import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenResponse;
 import com.vamshi.HospitalManagementSystem.auth.dto.RegisterRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.StaffLoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.UserProfileResponse;
-import com.vamshi.HospitalManagementSystem.auth.security.UserDetailsServiceImpl;
 import com.vamshi.HospitalManagementSystem.auth.services.AuthService;
 import com.vamshi.HospitalManagementSystem.common.ApiResponse;
 

@@ -15,11 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vamshi.HospitalManagementSystem.common.ApiResponse;
-import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.CreatePrescriptionRequest;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.PrescriptionResponse;
 import com.vamshi.HospitalManagementSystem.prescription.entities.PrescriptionEntity;
-import com.vamshi.HospitalManagementSystem.prescription.repositories.PrescriptionRepository;
 import com.vamshi.HospitalManagementSystem.prescription.services.PdfGeneratorService;
 import com.vamshi.HospitalManagementSystem.prescription.services.PrescriptionService;
 
