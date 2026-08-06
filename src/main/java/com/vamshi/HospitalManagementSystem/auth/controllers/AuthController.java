@@ -10,12 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vamshi.HospitalManagementSystem.auth.dto.AuthResponse;
 import com.vamshi.HospitalManagementSystem.auth.dto.ChangePasswordRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.OtpResponse;
 import com.vamshi.HospitalManagementSystem.auth.dto.PatientLoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenResponse;
-import com.vamshi.HospitalManagementSystem.auth.dto.RegisterRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.SendOtpRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.StaffLoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.UserProfileResponse;
+import com.vamshi.HospitalManagementSystem.auth.dto.VerifyLoginOtpRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.VerifyRegistrationOtpRequest;
 import com.vamshi.HospitalManagementSystem.auth.services.AuthService;
 import com.vamshi.HospitalManagementSystem.common.ApiResponse;
 
@@ -29,17 +32,6 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
         final AuthService authService;
-
-        @PostMapping("/register")
-        public ResponseEntity<ApiResponse<AuthResponse>> register(
-                        @RequestBody @Valid RegisterRequest request) {
-                AuthResponse response = authService.register(request);
-
-                System.out.println("====================REGISTER CONTROLLER=====================");
-
-                return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(ApiResponse.success("Registered Successfully", response));
-        }
 
         @PostMapping("/login")
         public ResponseEntity<ApiResponse<AuthResponse>> login(
@@ -110,5 +102,47 @@ public class AuthController {
 
                 return ResponseEntity.ok(
                                 ApiResponse.success("Password changed successfully"));
+        }
+
+        @PostMapping("/register/send-otp")
+        public ResponseEntity<ApiResponse<OtpResponse>> sendRegistrationOtp(
+                        @Valid @RequestBody SendOtpRequest request) {
+
+                OtpResponse response = authService.sendRegistrationOtp(request);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success("OTP sent successfully.", response));
+        }
+
+        @PostMapping("/register/verify")
+        public ResponseEntity<ApiResponse<OtpResponse>> verifyRegistrationOtp(
+                        @Valid @RequestBody VerifyRegistrationOtpRequest request) {
+
+                OtpResponse response = authService.verifyRegistrationOtp(request);
+
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                .body(ApiResponse.success(
+                                                "Registration completed successfully.",
+                                                response));
+        }
+
+        @PostMapping("/login/send-otp")
+        public ResponseEntity<ApiResponse<OtpResponse>> sendLoginOtp(
+                        @Valid @RequestBody SendOtpRequest request) {
+
+                OtpResponse response = authService.sendLoginOtp(request);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success("OTP sent successfully.", response));
+        }
+
+        @PostMapping("/login/verify-otp")
+        public ResponseEntity<ApiResponse<AuthResponse>> verifyLoginOtp(
+                        @Valid @RequestBody VerifyLoginOtpRequest request) {
+
+                AuthResponse response = authService.verifyLoginOtp(request);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success("Login successful.", response));
         }
 }

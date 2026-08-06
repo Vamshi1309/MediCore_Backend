@@ -15,8 +15,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.vamshi.HospitalManagementSystem.common.ApiResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+        private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
         @ExceptionHandler(ResourceAlreadyExistsException.class)
         public ResponseEntity<ApiResponse<?>> handleAlreadyExists(
@@ -73,6 +78,17 @@ public class GlobalExceptionHandler {
                                 .body(ApiResponse.error(message));
         }
 
+        @ExceptionHandler(TwilioException.class)
+        public ResponseEntity<ApiResponse<?>> handleTwilioException(
+                        TwilioException ex) {
+
+                log.error("Twilio Exception: ", ex);
+
+                return ResponseEntity
+                                .status(HttpStatus.BAD_GATEWAY)
+                                .body(ApiResponse.error(ex.getMessage()));
+        }
+
         @ExceptionHandler(HttpMessageNotReadableException.class)
         public ResponseEntity<ApiResponse<?>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
 
@@ -106,7 +122,7 @@ public class GlobalExceptionHandler {
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ApiResponse<?>> handleGeneric(
                         Exception ex) {
-
+                log.error("Unhandled exception: ", ex);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error(ex.getMessage()));
         }
 

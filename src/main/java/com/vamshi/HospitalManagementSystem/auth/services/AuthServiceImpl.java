@@ -11,23 +11,29 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vamshi.HospitalManagementSystem.auth.dto.AuthResponse;
 import com.vamshi.HospitalManagementSystem.auth.dto.ChangePasswordRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.OtpResponse;
 import com.vamshi.HospitalManagementSystem.auth.dto.PatientLoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.RefreshTokenResponse;
-import com.vamshi.HospitalManagementSystem.auth.dto.RegisterRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.SendOtpRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.StaffLoginRequest;
 import com.vamshi.HospitalManagementSystem.auth.dto.UserProfileResponse;
+import com.vamshi.HospitalManagementSystem.auth.dto.VerifyLoginOtpRequest;
+import com.vamshi.HospitalManagementSystem.auth.dto.VerifyRegistrationOtpRequest;
 import com.vamshi.HospitalManagementSystem.auth.entities.RefreshTokenEntity;
 import com.vamshi.HospitalManagementSystem.auth.repositories.RefreshTokenRepository;
 import com.vamshi.HospitalManagementSystem.auth.security.JwtUtil;
 import com.vamshi.HospitalManagementSystem.common.enums.Role;
+import com.vamshi.HospitalManagementSystem.exceptions.BadRequestException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity;
 import com.vamshi.HospitalManagementSystem.patient.repositories.PatientProfileRepository;
+import com.vamshi.HospitalManagementSystem.twilio.service.OtpService;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
 import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
@@ -51,45 +57,7 @@ public class AuthServiceImpl implements AuthService {
 
         private final JwtUtil jwtUtil;
 
-        @Override
-        public AuthResponse register(RegisterRequest request) {
-
-                if (userRepository.existsByphoneNumber(request.getPhoneNumber())) {
-                        throw new ResourceAlreadyExistsException("Phone Number Already Exists");
-                }
-
-                UserEntity user = new UserEntity();
-
-                user.setName(request.getName());
-                user.setPassword(passwordEncoder.encode(request.getPassword()));
-                user.setPhoneNumber(request.getPhoneNumber());
-                user.setRole(Role.PATIENT);
-
-                UserEntity savedUser = userRepository.save(user);
-
-                PatientProfileEntity patientProfile = PatientProfileEntity
-                                .builder()
-                                .user(savedUser)
-                                .build();
-
-                patientProfileRepository.save(patientProfile);
-
-                UserDetails userDetails = buildUserDetails(savedUser);
-
-                String accessToken = jwtUtil.generateAccessToken(userDetails);
-                String refreshToken = generateAndSaveRefreshToken(
-                                savedUser, userDetails);
-
-                AuthResponse resp = new AuthResponse();
-
-                resp.setAccessToken(accessToken);
-                resp.setRefreshToken(refreshToken);
-                resp.setId(savedUser.getId());
-                resp.setRole(savedUser.getRole());
-                resp.setName(savedUser.getName());
-
-                return resp;
-        }
+        private final OtpService otpService;
 
         @Override
         public AuthResponse patientLogin(PatientLoginRequest request) {
@@ -102,21 +70,7 @@ public class AuthServiceImpl implements AuthService {
                                 request.getPhoneNumber())
                                 .orElseThrow(() -> new ResourceNotFoundException("User not exist"));
 
-                UserDetails userDetails = buildUserDetails(user);
-
-                String accessToken = jwtUtil.generateAccessToken(userDetails);
-                String refreshToken = generateAndSaveRefreshToken(
-                                user, userDetails);
-
-                AuthResponse response = new AuthResponse();
-                response.setId(user.getId());
-                response.setName(user.getName());
-                response.setPhoneNumber(user.getPhoneNumber());
-                response.setRole(user.getRole());
-                response.setAccessToken(accessToken);
-                response.setRefreshToken(refreshToken);
-
-                return response;
+                return generateAuthResponse(user);
         }
 
         @Override
@@ -135,11 +89,6 @@ public class AuthServiceImpl implements AuthService {
                                 user, userDetails);
 
                 AuthResponse response = new AuthResponse();
-                response.setId(user.getId());
-                response.setName(user.getName());
-                response.setMustChangePassword(user.getMustChangePassword());
-                response.setStaffId(user.getStaffId());
-                response.setRole(user.getRole());
                 response.setAccessToken(accessToken);
                 response.setRefreshToken(refreshToken);
 
@@ -191,18 +140,6 @@ public class AuthServiceImpl implements AuthService {
                                 .accessToken(newAccessToken)
                                 .refreshToken(newRefreshToken)
                                 .build();
-        }
-
-        private UserDetails buildUserDetails(UserEntity user) {
-                String principal = user.getRole() == Role.PATIENT
-                                ? user.getPhoneNumber()
-                                : user.getStaffId();
-
-                return new User(
-                                principal,
-                                user.getPassword(),
-                                List.of(new SimpleGrantedAuthority(
-                                                "ROLE_" + user.getRole().name())));
         }
 
         // ── Helper — generate + save refresh token ───────────
@@ -277,5 +214,139 @@ public class AuthServiceImpl implements AuthService {
                 user.setPassword(passwordEncoder.encode(request.getNewPassword()));
                 user.setMustChangePassword(false);
                 userRepository.save(user);
+        }
+
+        @Override
+        public OtpResponse sendRegistrationOtp(SendOtpRequest request) {
+                if (userRepository.existsByphoneNumber(request.getPhoneNumber())) {
+                        throw new ResourceAlreadyExistsException("User with this phone number already exists");
+                }
+
+                otpService.sendOtp(request.getPhoneNumber());
+
+                return OtpResponse.builder()
+                                .message("OTP sent successfully.")
+                                .build();
+        }
+
+        @Override
+        @Transactional
+        public OtpResponse verifyRegistrationOtp(VerifyRegistrationOtpRequest request) {
+                // Verify OTP
+                if (!otpService.verifyOtp(
+                                request.getPhoneNumber(),
+                                request.getOtp())) {
+
+                        throw new BadRequestException("Invalid or expired OTP.");
+                }
+
+                // Double-check phone number
+                if (userRepository.existsByphoneNumber(request.getPhoneNumber())) {
+                        throw new ResourceAlreadyExistsException(
+                                        "Phone number already registered.");
+                }
+
+                UserEntity user = UserEntity.builder()
+                                .name(request.getName())
+                                .phoneNumber(request.getPhoneNumber())
+                                .password(passwordEncoder.encode(request.getPassword()))
+                                .role(Role.PATIENT)
+                                .build();
+
+                userRepository.save(user);
+
+                PatientProfileEntity patientProfile = PatientProfileEntity.builder()
+                                .user(user)
+                                .build();
+
+                patientProfileRepository.save(patientProfile);
+
+                return OtpResponse.builder()
+                                .message("Registration completed successfully.")
+                                .build();
+
+        }
+
+        @Override
+        public OtpResponse sendLoginOtp(SendOtpRequest request) {
+                UserEntity user = userRepository.findByPhoneNumber(request.getPhoneNumber())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "No account found with this phone number."));
+
+                if (user.getRole() != Role.PATIENT) {
+                        throw new BadRequestException(
+                                        "OTP login is available only for patients.");
+                }
+
+                if (!Boolean.TRUE.equals(user.getIsActive())) {
+                        throw new BadRequestException(
+                                        "Your account is inactive. Please contact support.");
+                }
+
+                otpService.sendOtp(request.getPhoneNumber());
+
+                return OtpResponse.builder()
+                                .message("OTP sent successfully.")
+                                .build();
+        }
+
+        @Override
+        @Transactional
+        public AuthResponse verifyLoginOtp(VerifyLoginOtpRequest request) {
+                // Verify OTP
+                if (!otpService.verifyOtp(request.getPhoneNumber(), request.getOtp())) {
+                        throw new BadRequestException("Invalid or expired OTP.");
+                }
+
+                // Find user
+                UserEntity user = userRepository.findByPhoneNumber(request.getPhoneNumber())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "No account found with this phone number."));
+
+                if (user.getRole() != Role.PATIENT) {
+                        throw new BadRequestException(
+                                        "OTP login is available only for patients.");
+                }
+
+                if (!Boolean.TRUE.equals(user.getIsActive())) {
+                        throw new BadRequestException(
+                                        "Your account is inactive. Please contact support.");
+                }
+
+                // Generate tokens
+                return generateAuthResponse(user);
+        }
+
+        private UserDetails buildUserDetails(UserEntity user) {
+                String principal = user.getRole() == Role.PATIENT
+                                ? user.getPhoneNumber()
+                                : user.getStaffId();
+
+                return new User(
+                                principal,
+                                user.getPassword(),
+                                List.of(new SimpleGrantedAuthority(
+                                                "ROLE_" + user.getRole().name())));
+        }
+
+        private AuthResponse generateAuthResponse(UserEntity user) {
+
+                UserDetails userDetails = buildUserDetails(user);
+
+                String accessToken = jwtUtil.generateAccessToken(userDetails);
+                String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+
+                RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.builder()
+                                .token(refreshToken)
+                                .user(user)
+                                .build();
+
+                refreshTokenRepository.save(refreshTokenEntity);
+
+                AuthResponse response = new AuthResponse();
+                response.setAccessToken(accessToken);
+                response.setRefreshToken(refreshToken);
+
+                return response;
         }
 }
