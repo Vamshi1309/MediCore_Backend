@@ -38,11 +38,7 @@ public class SecurityConfig {
                                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint)
                                                 .accessDeniedHandler(accessDeniedHandler))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(
-                                                                "/api/auth/login",
-                                                                "/api/auth/register",
-                                                                "/api/auth/staff/login",
-                                                                "/api/auth/refresh")
+                                                .requestMatchers("/api/auth/**")
                                                 .permitAll()
                                                 .requestMatchers("/api/admin/**")
                                                 .hasRole("ADMIN")
