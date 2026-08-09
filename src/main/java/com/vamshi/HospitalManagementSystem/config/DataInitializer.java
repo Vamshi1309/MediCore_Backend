@@ -172,5 +172,15 @@ public class DataInitializer implements CommandLineRunner {
 
             );
         }
+
+        saveIfNotExists(
+                UserEntity.builder()
+                        .name("vamshi")
+                        .phoneNumber("8639933075")
+                        .email("vamshi@hospital.com")
+                        .password(passwordEncoder.encode("test@123"))
+                        .role(Role.PATIENT)
+                        .isActive(true)
+                        .build());
     }
 }
