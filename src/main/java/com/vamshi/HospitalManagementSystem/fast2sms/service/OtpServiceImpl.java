@@ -1,4 +1,4 @@
-package com.vamshi.HospitalManagementSystem.twilio.service;
+package com.vamshi.HospitalManagementSystem.fast2sms.service;
 
 import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
@@ -17,7 +17,7 @@ public class OtpServiceImpl implements OtpService {
     private static final String OTP_PREFIX = "otp:";
     private static final Duration OTP_EXPIRY = Duration.ofMinutes(5);
 
-    private final TwilioService twilioService;
+    private final Fast2SmsService fast2SmsService;
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
@@ -35,12 +35,7 @@ public class OtpServiceImpl implements OtpService {
                 otp,
                 OTP_EXPIRY);
 
-        String message = String.format(
-                "Your MediCore OTP is %s. It is valid for %d minutes.",
-                otp,
-                OTP_EXPIRY.toMinutes());
-
-        twilioService.sendSms("+91" + phoneNumber, message);
+        fast2SmsService.sendOtp(phoneNumber, otp);
     }
 
     @Override

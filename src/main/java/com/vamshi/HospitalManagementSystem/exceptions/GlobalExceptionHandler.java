@@ -78,9 +78,9 @@ public class GlobalExceptionHandler {
                                 .body(ApiResponse.error(message));
         }
 
-        @ExceptionHandler(TwilioException.class)
+        @ExceptionHandler(Fast2SmsException.class)
         public ResponseEntity<ApiResponse<?>> handleTwilioException(
-                        TwilioException ex) {
+                        Fast2SmsException ex) {
 
                 log.error("Twilio Exception: ", ex);
 

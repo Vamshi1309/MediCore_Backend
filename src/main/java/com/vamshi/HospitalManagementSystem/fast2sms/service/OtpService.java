@@ -1,4 +1,4 @@
-package com.vamshi.HospitalManagementSystem.twilio.service;
+package com.vamshi.HospitalManagementSystem.fast2sms.service;
 
 public interface OtpService {
 

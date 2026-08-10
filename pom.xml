@@ -121,13 +121,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Twilio -->
-        <dependency>
-            <groupId>com.twilio.sdk</groupId>
-            <artifactId>twilio</artifactId>
-            <version>10.9.2</version>
-        </dependency>
-
     </dependencies>
 
     <build>
