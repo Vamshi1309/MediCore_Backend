@@ -9,9 +9,9 @@ import lombok.Getter;
 @Configuration
 public class Fast2SmsConfig {
 
-    @Value("${fast2sms.api.key}")
+    @Value("${fast2sms.api-key}")
     private String apiKey;
 
-    @Value("${fast2sms.api.url}")
+    @Value("${fast2sms.api-url}")
     private String apiUrl;
 }
