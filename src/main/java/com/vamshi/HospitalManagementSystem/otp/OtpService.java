@@ -1,4 +1,4 @@
-package com.vamshi.HospitalManagementSystem.fast2sms.service;
+package com.vamshi.HospitalManagementSystem.otp;
 
 public interface OtpService {
 

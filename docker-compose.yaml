@@ -1,45 +1,45 @@
-services:
-  backend:
-    image: ghcr.io/vamshi1309/hospitalmanagementsystem-backend:latest
-    container_name: hosptial-backend
+  services:
+    backend:
+      image: ghcr.io/vamshi1309/hospitalmanagementsystem-backend:latest
+      container_name: hosptial-backend
 
-    ports:
-      - "8081:8080"
-    
-    env_file:
-      - .env
-    
-    depends_on:
-      - postgres
-      - redis
-    
-    restart: unless-stopped
+      ports:
+        - "8081:8080"
+      
+      env_file:
+        - .env
+      
+      depends_on:
+        - postgres
+        - redis
+      
+      restart: unless-stopped
 
-  postgres:
-    image: postgres:17
-    container_name: hospital-postgres
+    postgres:
+      image: postgres:17
+      container_name: hospital-postgres
 
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      environment:
+        POSTGRES_DB: ${DB_NAME}
+        POSTGRES_USER: ${DB_USERNAME}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
 
-    ports:
-      - "5432:5432"
-    
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      ports:
+        - "5432:5432"
+      
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
 
-    restart: unless-stopped
+      restart: unless-stopped
 
-  redis:
-    image: redis:7-alpine
-    container_name: hospital-redis
+    redis:
+      image: redis:7-alpine
+      container_name: hospital-redis
 
-    ports:
-      - "6389:6379"
+      ports:
+        - "6389:6379"
 
-    restart: unless-stopped
+      restart: unless-stopped
 
-volumes:
-  postgres_data:
+  volumes:
+    postgres_data:

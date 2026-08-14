@@ -31,7 +31,7 @@ import com.vamshi.HospitalManagementSystem.common.enums.Role;
 import com.vamshi.HospitalManagementSystem.exceptions.BadRequestException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
-import com.vamshi.HospitalManagementSystem.fast2sms.service.OtpService;
+import com.vamshi.HospitalManagementSystem.otp.OtpService;
 import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity;
 import com.vamshi.HospitalManagementSystem.patient.repositories.PatientProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
@@ -339,6 +339,8 @@ public class AuthServiceImpl implements AuthService {
                 RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.builder()
                                 .token(refreshToken)
                                 .user(user)
+                                .expiryDate(LocalDateTime.now().plusDays(7))
+                                .revoked(false)
                                 .build();
 
                 refreshTokenRepository.save(refreshTokenEntity);

@@ -114,7 +114,7 @@ public class AuthController {
                                 ApiResponse.success("OTP sent successfully.", response));
         }
 
-        @PostMapping("/register/verify")
+        @PostMapping("/register/verify-otp")
         public ResponseEntity<ApiResponse<OtpResponse>> verifyRegistrationOtp(
                         @Valid @RequestBody VerifyRegistrationOtpRequest request) {
 
