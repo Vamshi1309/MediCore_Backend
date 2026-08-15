@@ -38,8 +38,23 @@ public class SecurityConfig {
                                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint)
                                                 .accessDeniedHandler(accessDeniedHandler))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/auth/**")
+                                                .requestMatchers(
+                                                                "/api/auth/login",
+                                                                "/api/auth/staff/login",
+                                                                "/api/auth/refresh",
+                                                                "/api/auth/register/send-otp",
+                                                                "/api/auth/register/verify-otp",
+                                                                "/api/auth/login/send-otp",
+                                                                "/api/auth/login/verify-otp")
                                                 .permitAll()
+
+                                                // PROTECTED
+                                                .requestMatchers(
+                                                                "/api/auth/me",
+                                                                "/api/auth/logout",
+                                                                "/api/auth/change-password")
+                                                .authenticated()
+                                
                                                 .requestMatchers(
                                                                 "/swagger-ui/**",
                                                                 "/swagger-ui.html",

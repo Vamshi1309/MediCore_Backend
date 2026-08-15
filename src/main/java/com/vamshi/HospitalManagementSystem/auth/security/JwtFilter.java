@@ -12,6 +12,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.vamshi.HospitalManagementSystem.auth.services.TokenBlacklistService;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,11 +46,47 @@ public class JwtFilter extends OncePerRequestFilter {
                         token = authHeader.substring(7);
 
                         if (tokenBlacklistService.isBlackListed(token)) {
-                                filterChain.doFilter(request, response);
-                                return; 
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json");
+
+                                response.getWriter().write("""
+                                                {
+                                                    "message": "Access token revoked"
+                                                }
+                                                """);
+
+                                return;
                         }
 
-                        phoneNumber = jwtUtil.extractPhoneNumber(token);
+                        try {
+                                phoneNumber = jwtUtil.extractPhoneNumber(token);
+                                System.out.println("JWT PHONE NUMBER = [" + phoneNumber + "]");
+
+                        } catch (ExpiredJwtException e) {
+
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json");
+
+                                response.getWriter().write("""
+                                                {
+                                                    "message": "Access token expired"
+                                                }
+                                                """);
+
+                                return;
+                        } catch (JwtException e) {
+
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json");
+
+                                response.getWriter().write("""
+                                                {
+                                                    "message": "Invalid access token"
+                                                }
+                                                """);
+
+                                return;
+                        }
                 }
 
                 if (phoneNumber != null
@@ -79,5 +117,19 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
 
                 filterChain.doFilter(request, response);
+        }
+
+        @Override
+        protected boolean shouldNotFilter(HttpServletRequest request) {
+
+                String path = request.getServletPath();
+
+                return path.equals("/api/auth/login")
+                                || path.equals("/api/auth/staff/login")
+                                || path.equals("/api/auth/refresh")
+                                || path.equals("/api/auth/register/send-otp")
+                                || path.equals("/api/auth/register/verify-otp")
+                                || path.equals("/api/auth/login/send-otp")
+                                || path.equals("/api/auth/login/verify-otp");
         }
 }

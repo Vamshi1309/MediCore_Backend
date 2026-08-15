@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -181,9 +182,16 @@ public class AuthServiceImpl implements AuthService {
 
         @Override
         public UserProfileResponse getMe() {
-                String identifier = SecurityContextHolder.getContext()
-                                .getAuthentication()
-                                .getName();
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+                String identifier = authentication.getName();
+
+                System.out.println("========== GET ME ==========");
+                System.out.println("Authentication: " + authentication);
+                System.out.println("Principal: " + authentication.getPrincipal());
+                System.out.println("Name: " + authentication.getName());
+                System.out.println("Identifier: [" + identifier + "]");
+                System.out.println("============================");
 
                 UserEntity user = userRepository.findByPhoneNumber(identifier)
                                 .or(() -> userRepository.findByStaffIdAndRoleNot(identifier, Role.PATIENT))
