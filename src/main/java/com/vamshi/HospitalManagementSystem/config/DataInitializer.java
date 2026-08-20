@@ -48,7 +48,7 @@ public class DataInitializer implements CommandLineRunner {
         boolean exists;
 
         if (user.getRole() == Role.PATIENT) {
-            exists = userRepository.existsByphoneNumber(user.getPhoneNumber());
+            exists = userRepository.existsByPhoneNumber(user.getPhoneNumber());
         } else {
             exists = userRepository.existsByStaffId(user.getStaffId());
         }

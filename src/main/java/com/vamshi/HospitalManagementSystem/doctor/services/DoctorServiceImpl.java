@@ -1,9 +1,9 @@
 package com.vamshi.HospitalManagementSystem.doctor.services;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vamshi.HospitalManagementSystem.doctor.dtos.DoctorProfileResponse;
+import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.doctor.dtos.UpdateDoctorProfileRequest;
 import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
@@ -21,12 +21,11 @@ public class DoctorServiceImpl implements DoctorService {
 
     private final UserRepository userRepository;
 
+    private final AuthUtil authUtil;
+
     @Override
     public DoctorProfileResponse getMyProfile() {
-        String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        UserEntity user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with that phone number"));
+        UserEntity user = authUtil.getLoggedInUser();
 
         DoctorProfileEntity doctor = doctorRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with that Id"));
@@ -36,10 +35,7 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public DoctorProfileResponse updateMyProfile(UpdateDoctorProfileRequest request) {
-        String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        UserEntity user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with that phone number"));
+        UserEntity user = authUtil.getLoggedInUser();
 
         DoctorProfileEntity doctor = doctorRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with that Id"));

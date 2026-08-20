@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vamshi.HospitalManagementSystem.appointment.entities.AppointmentEntity;
 import com.vamshi.HospitalManagementSystem.appointment.repositories.AppointmentRepository;
 import com.vamshi.HospitalManagementSystem.common.enums.AppointmentStatus;
+import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
@@ -37,14 +38,13 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         private final DoctorProfileRepository doctorProfileRepository;
 
-        private final UserRepository userRepository;
+        //private final UserRepository userRepository;
+
+        private final AuthUtil authUtil;
 
         @Override
         public PrescriptionResponse createPrescription(CreatePrescriptionRequest request) {
-                String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-
-                UserEntity doctor = userRepository.findByPhoneNumber(phoneNumber)
-                                .orElseThrow(() -> new ResourceNotFoundException("Doctor Not Found with that id"));
+                UserEntity doctor = authUtil.getLoggedInUser();
 
                 AppointmentEntity appointment = appointmentRepository.findById(request.getAppointmentId())
                                 .orElseThrow(() -> new ResourceNotFoundException("No Appointment Found"));

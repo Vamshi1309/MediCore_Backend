@@ -29,9 +29,11 @@ import com.vamshi.HospitalManagementSystem.auth.entities.RefreshTokenEntity;
 import com.vamshi.HospitalManagementSystem.auth.repositories.RefreshTokenRepository;
 import com.vamshi.HospitalManagementSystem.auth.security.JwtUtil;
 import com.vamshi.HospitalManagementSystem.common.enums.Role;
+import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.exceptions.BadRequestException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
+import com.vamshi.HospitalManagementSystem.exceptions.UnauthorizedRoleException;
 import com.vamshi.HospitalManagementSystem.otp.OtpService;
 import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity;
 import com.vamshi.HospitalManagementSystem.patient.repositories.PatientProfileRepository;
@@ -58,6 +60,8 @@ public class AuthServiceImpl implements AuthService {
 
         private final JwtUtil jwtUtil;
 
+        private final AuthUtil authUtil;
+
         private final OtpService otpService;
 
         @Override
@@ -70,7 +74,10 @@ public class AuthServiceImpl implements AuthService {
                 UserEntity user = userRepository.findByPhoneNumber(
                                 request.getPhoneNumber())
                                 .orElseThrow(() -> new ResourceNotFoundException("User not exist"));
-
+                if (user.getRole() != Role.PATIENT) {
+                        throw new UnauthorizedRoleException(
+                                        "Please use staff login");
+                }
                 return generateAuthResponse(user);
         }
 
@@ -82,6 +89,11 @@ public class AuthServiceImpl implements AuthService {
                 UserEntity user = userRepository.findByStaffIdAndRoleNot(
                                 request.getStaffId(), Role.PATIENT)
                                 .orElseThrow(() -> new ResourceNotFoundException("User not exist"));
+
+                if (user.getRole() == Role.PATIENT) {
+                        throw new UnauthorizedRoleException(
+                                        "Patients cannot use staff login");
+                }
 
                 UserDetails userDetails = buildUserDetails(user);
 
@@ -184,18 +196,7 @@ public class AuthServiceImpl implements AuthService {
         public UserProfileResponse getMe() {
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-                String identifier = authentication.getName();
-
-                System.out.println("========== GET ME ==========");
-                System.out.println("Authentication: " + authentication);
-                System.out.println("Principal: " + authentication.getPrincipal());
-                System.out.println("Name: " + authentication.getName());
-                System.out.println("Identifier: [" + identifier + "]");
-                System.out.println("============================");
-
-                UserEntity user = userRepository.findByPhoneNumber(identifier)
-                                .or(() -> userRepository.findByStaffIdAndRoleNot(identifier, Role.PATIENT))
-                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                UserEntity user = authUtil.getLoggedInUser();
 
                 return UserProfileResponse.builder()
                                 .id(user.getId())
@@ -226,7 +227,7 @@ public class AuthServiceImpl implements AuthService {
 
         @Override
         public OtpResponse sendRegistrationOtp(SendOtpRequest request) {
-                if (userRepository.existsByphoneNumber(request.getPhoneNumber())) {
+                if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
                         throw new ResourceAlreadyExistsException("User with this phone number already exists");
                 }
 
@@ -249,7 +250,7 @@ public class AuthServiceImpl implements AuthService {
                 }
 
                 // Double-check phone number
-                if (userRepository.existsByphoneNumber(request.getPhoneNumber())) {
+                if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
                         throw new ResourceAlreadyExistsException(
                                         "Phone number already registered.");
                 }

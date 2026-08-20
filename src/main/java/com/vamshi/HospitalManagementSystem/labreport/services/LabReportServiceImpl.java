@@ -3,12 +3,12 @@ package com.vamshi.HospitalManagementSystem.labreport.services;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.vamshi.HospitalManagementSystem.appointment.entities.AppointmentEntity;
 import com.vamshi.HospitalManagementSystem.appointment.repositories.AppointmentRepository;
+import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.labreport.dtos.CreateLabReportRequest;
@@ -24,17 +24,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LabReportServiceImpl implements LabReportService {
 
-        private final LabReportRepository labReportRepository;
-        private final AppointmentRepository appointmentRepository;
-        private final UserRepository userRepository;
-        private final S3Service s3Service;
+	private final LabReportRepository labReportRepository;
+	private final AppointmentRepository appointmentRepository;
+	private final UserRepository userRepository;
+	private final S3Service s3Service;
+	private final AuthUtil authUtil;
 
-        @Override
-        public LabReportResponse createLabReport(CreateLabReportRequest request, MultipartFile file) {
-                String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-
-                UserEntity radiologist = userRepository.findByPhoneNumber(phoneNumber)
-                                .orElseThrow(() -> new ResourceNotFoundException("User not Found"));
+	@Override
+	public LabReportResponse createLabReport(CreateLabReportRequest request, MultipartFile file) {
+		UserEntity radiologist = authUtil.getLoggedInUser();
 
                 AppointmentEntity appointment = appointmentRepository.findById(request.getAppointmentId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));

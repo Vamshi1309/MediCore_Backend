@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.inventory.entities.MedicineEntity;
@@ -30,18 +30,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PharmacyServiceImpl implements PharmacyService {
 
-        private final DispenseRepository dispenseRepository;
-        private final InventoryService inventoryService;
-        private final InventoryRepository inventoryRepository;
-        private final UserRepository userRepository;
-        private final PrescriptionRepository prescriptionRepository;
+	private final DispenseRepository dispenseRepository;
+	private final InventoryService inventoryService;
+	private final InventoryRepository inventoryRepository;
+	private final UserRepository userRepository;
+	private final PrescriptionRepository prescriptionRepository;
+	private final AuthUtil authUtil;
 
-        @Override
-        public DispenseResponse dispenseMedicine(DispenseMedicineRequest request) {
-                String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-
-                UserEntity pharmacist = userRepository.findByPhoneNumber(phoneNumber)
-                                .orElseThrow(() -> new ResourceNotFoundException("Pharmacist not found"));
+	@Override
+	public DispenseResponse dispenseMedicine(DispenseMedicineRequest request) {
+		UserEntity pharmacist = authUtil.getLoggedInUser();
 
                 PrescriptionEntity prescription = prescriptionRepository
                                 .findById(request.getPrescriptionId())

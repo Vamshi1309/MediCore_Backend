@@ -1,9 +1,7 @@
 package com.vamshi.HospitalManagementSystem.patient.services;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
+	import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.patient.dtos.PatientProfileResponse;
 import com.vamshi.HospitalManagementSystem.patient.dtos.UpdatePatientProfileRequest;
 import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity;
@@ -19,20 +17,12 @@ public class PatientServiceImpl implements PatientService {
 
     private final PatientProfileRepository patientRepository;
     private final UserRepository userRepository;
+    private final AuthUtil authUtil;
 
     @Override
     public PatientProfileResponse getMyProfile() {
 
-        String phoneNumber = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-
-        UserEntity user = userRepository
-                .findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException(
-                        "User not found"));
+        UserEntity user = authUtil.getLoggedInUser();
 
         PatientProfileEntity patient = patientRepository
                 .findByUserId(user.getId())
@@ -47,16 +37,7 @@ public class PatientServiceImpl implements PatientService {
     public PatientProfileResponse updateMyProfile(
             UpdatePatientProfileRequest request) {
 
-        String phoneNumber = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-
-        UserEntity user = userRepository
-                .findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException(
-                        "User not found"));
+        UserEntity user = authUtil.getLoggedInUser();
 
         PatientProfileEntity patient = patientRepository
                 .findByUserId(user.getId())

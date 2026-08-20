@@ -14,6 +14,7 @@ import com.vamshi.HospitalManagementSystem.appointment.entities.AppointmentEntit
 import com.vamshi.HospitalManagementSystem.appointment.repositories.AppointmentRepository;
 import com.vamshi.HospitalManagementSystem.common.enums.AppointmentStatus;
 import com.vamshi.HospitalManagementSystem.common.enums.Role;
+import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
@@ -33,15 +34,13 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         private final DoctorProfileRepository doctorProfileRepository;
 
+        private final AuthUtil authUtil;
+
         @Override
         public AppointmentResponse createAppointment(CreateAppointmentRequest request) {
-                String phoneNumber = SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getName();
 
-                UserEntity createdBy = userRepository.findByPhoneNumber(phoneNumber)
-                                .orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
+                // Replace above 6 lines with:
+                UserEntity createdBy = authUtil.getLoggedInUser();
                 Optional<UserEntity> patientOptional = userRepository.findById(request.getPatientId());
                 if (patientOptional.isEmpty()) {
                         throw new ResourceNotFoundException("Patient Not Found With That ID");

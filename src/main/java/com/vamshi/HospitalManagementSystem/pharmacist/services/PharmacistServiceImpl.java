@@ -1,8 +1,8 @@
 package com.vamshi.HospitalManagementSystem.pharmacist.services;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.pharmacist.dtos.PharmacistProfileResponse;
 import com.vamshi.HospitalManagementSystem.pharmacist.dtos.UpdatePharmacistProfileRequest;
@@ -19,20 +19,12 @@ public class PharmacistServiceImpl implements PharmacistService {
 
     private final PharmacistProfileRepository pharmacistRepository;
     private final UserRepository userRepository;
+    private final AuthUtil authUtil;
 
     @Override
     public PharmacistProfileResponse getMyProfile() {
 
-        String phoneNumber = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-
-        UserEntity user = userRepository
-                .findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException(
-                        "User not found"));
+        UserEntity user = authUtil.getLoggedInUser();
 
         PharmacistProfileEntity pharmacist = pharmacistRepository
                 .findByUserId(user.getId())
@@ -47,16 +39,7 @@ public class PharmacistServiceImpl implements PharmacistService {
     public PharmacistProfileResponse updateMyProfile(
             UpdatePharmacistProfileRequest request) {
 
-        String phoneNumber = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-
-        UserEntity user = userRepository
-                .findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException(
-                        "User not found"));
+        UserEntity user = authUtil.getLoggedInUser();
 
         PharmacistProfileEntity pharmacist = pharmacistRepository
                 .findByUserId(user.getId())

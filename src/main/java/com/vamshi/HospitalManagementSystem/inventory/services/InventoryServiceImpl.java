@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vamshi.HospitalManagementSystem.exceptions.BadRequestException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
+import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.inventory.dtos.AddMedicineRequest;
 import com.vamshi.HospitalManagementSystem.inventory.dtos.MedicineResponse;
 import com.vamshi.HospitalManagementSystem.inventory.dtos.UpdateMedicineRequest;
@@ -26,6 +26,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final UserRepository userRepository;
+    private final AuthUtil authUtil;
 
     @Override
     public MedicineResponse addMedicine(AddMedicineRequest request) {
@@ -34,10 +35,7 @@ public class InventoryServiceImpl implements InventoryService {
             throw new ResourceAlreadyExistsException("Medicine already exists: " + request.getMedicineName());
         }
 
-        String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        UserEntity pharmacist = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserEntity pharmacist = authUtil.getLoggedInUser();
 
         MedicineEntity medicine = MedicineEntity.builder()
                 .medicineName(request.getMedicineName())

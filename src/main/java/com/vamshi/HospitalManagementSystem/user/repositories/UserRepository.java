@@ -11,7 +11,9 @@ import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByPhoneNumber(String phoneNumber);
 
-    boolean existsByphoneNumber(String phoneNumber);
+    Optional<UserEntity> findByStaffId(String staffId); 
+
+    boolean existsByPhoneNumber(String phoneNumber);
 
     boolean existsByEmail(String email);
 

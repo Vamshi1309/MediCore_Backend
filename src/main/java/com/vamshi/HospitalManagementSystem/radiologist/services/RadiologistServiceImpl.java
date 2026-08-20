@@ -1,9 +1,7 @@
 package com.vamshi.HospitalManagementSystem.radiologist.services;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
+	import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.radiologist.dtos.RadiologistProfileResponse;
 import com.vamshi.HospitalManagementSystem.radiologist.dtos.UpdateRadiologistProfileRequest;
 import com.vamshi.HospitalManagementSystem.radiologist.entities.RadiologistEntity;
@@ -19,14 +17,11 @@ public class RadiologistServiceImpl implements RadiologistService {
 
     private final RadiologistProfileRepository radiologistRepository;
 
-    private final UserRepository userRepository;
+    private final AuthUtil authUtil;
 
     @Override
     public RadiologistProfileResponse getMyProfile() {
-        String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        UserEntity user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserEntity user = authUtil.getLoggedInUser();
 
         RadiologistEntity radiologist = radiologistRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Radiologist not found with that Id"));
@@ -36,10 +31,7 @@ public class RadiologistServiceImpl implements RadiologistService {
 
     @Override
     public RadiologistProfileResponse updateMyProfile(UpdateRadiologistProfileRequest request) {
-        String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        UserEntity user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserEntity user = authUtil.getLoggedInUser();
 
         RadiologistEntity radiologist = radiologistRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Radiologist not found with that Id"));
