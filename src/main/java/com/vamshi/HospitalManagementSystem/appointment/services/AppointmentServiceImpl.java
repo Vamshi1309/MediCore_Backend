@@ -14,6 +14,8 @@ import com.vamshi.HospitalManagementSystem.appointment.entities.AppointmentEntit
 import com.vamshi.HospitalManagementSystem.appointment.repositories.AppointmentRepository;
 import com.vamshi.HospitalManagementSystem.common.enums.AppointmentStatus;
 import com.vamshi.HospitalManagementSystem.common.enums.Role;
+import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
+import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.exceptions.UnauthorizedRoleException;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
@@ -28,6 +30,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         private final UserRepository userRepository;
 
         private final AppointmentRepository appointmentRepository;
+
+        private final DoctorProfileRepository doctorProfileRepository;
 
         @Override
         public AppointmentResponse createAppointment(CreateAppointmentRequest request) {
@@ -132,6 +136,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         private AppointmentResponse mapToResponse(
                         AppointmentEntity appointment) {
+                DoctorProfileEntity doctorProfile = doctorProfileRepository
+                                .findByUserId(appointment.getDoctor().getId())
+                                .orElse(null);
 
                 return AppointmentResponse.builder()
                                 .appointmentId(
@@ -145,6 +152,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                                 .doctorName(
                                                 appointment.getDoctor().getName())
                                 .createdById(appointment.getCreatedBy().getId())
+                                .doctorSpecialization(
+                                                doctorProfile != null
+                                                                ? doctorProfile.getSpecialization()
+                                                                : null)
                                 .createdByName(appointment.getCreatedBy().getName())
                                 .scheduledAt(
                                                 appointment.getScheduledAt())

@@ -23,6 +23,7 @@ public class AppointmentResponse {
     private String patientName;
     private UUID doctorId;
     private String doctorName;
+    private String doctorSpecialization;
     private UUID createdById;
     private String createdByName;
     private LocalDateTime scheduledAt;

@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vamshi.HospitalManagementSystem.appointment.entities.AppointmentEntity;
 import com.vamshi.HospitalManagementSystem.appointment.repositories.AppointmentRepository;
 import com.vamshi.HospitalManagementSystem.common.enums.AppointmentStatus;
+import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
+import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.CreatePrescriptionRequest;
@@ -32,6 +34,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         private final PrescriptionRepository prescriptionRepository;
 
         private final AppointmentRepository appointmentRepository;
+
+        private final DoctorProfileRepository doctorProfileRepository;
 
         private final UserRepository userRepository;
 
@@ -121,6 +125,10 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                 .stream()
                                 .map(this::mapItemToResponse)
                                 .toList();
+                DoctorProfileEntity doctorProfile = doctorProfileRepository
+                                .findByUserId(prescription.getDoctor().getId())
+                                .orElse(null);
+
                 return PrescriptionResponse.builder()
                                 .prescriptionId(prescription.getId())
                                 .appointmentId(prescription.getAppointment().getId())
@@ -128,6 +136,10 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                 .doctorName(prescription.getDoctor().getName())
                                 .patientId(prescription.getPatient().getId())
                                 .patientName(prescription.getPatient().getName())
+                                .doctorSpecialization(
+                                                doctorProfile != null
+                                                                ? doctorProfile.getSpecialization()
+                                                                : null)
                                 .items(items)
                                 .notes(prescription.getNotes())
                                 .createdAt(prescription.getCreatedAt())

@@ -17,6 +17,7 @@ public class PrescriptionResponse {
 
     private UUID doctorId;
     private String doctorName;
+    private String doctorSpecialization;
 
     private UUID patientId;
     private String patientName;
