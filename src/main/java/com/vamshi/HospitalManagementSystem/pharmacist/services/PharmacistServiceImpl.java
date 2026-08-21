@@ -9,7 +9,6 @@ import com.vamshi.HospitalManagementSystem.pharmacist.dtos.UpdatePharmacistProfi
 import com.vamshi.HospitalManagementSystem.pharmacist.entities.PharmacistProfileEntity;
 import com.vamshi.HospitalManagementSystem.pharmacist.repositories.PharmacistProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
-import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 public class PharmacistServiceImpl implements PharmacistService {
 
     private final PharmacistProfileRepository pharmacistRepository;
-    private final UserRepository userRepository;
     private final AuthUtil authUtil;
 
     @Override

@@ -9,7 +9,6 @@ import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
-import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,12 +18,13 @@ public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorProfileRepository doctorRepository;
 
-    private final UserRepository userRepository;
+    // private final UserRepository userRepository;
 
     private final AuthUtil authUtil;
 
     @Override
     public DoctorProfileResponse getMyProfile() {
+        
         UserEntity user = authUtil.getLoggedInUser();
 
         DoctorProfileEntity doctor = doctorRepository.findByUserId(user.getId())

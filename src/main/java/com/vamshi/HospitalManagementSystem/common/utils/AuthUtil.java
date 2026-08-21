@@ -13,21 +13,25 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthUtil {
 
-    private final UserRepository userRepository;
+        private final UserRepository userRepository;
 
-    public UserEntity getLoggedInUser() {
+        public UserEntity getLoggedInUser() {
 
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
+                String username = SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName();
 
-        // Try phoneNumber first (Patient)
-        return userRepository
-                .findByPhoneNumber(username)
-                .orElseGet(() -> userRepository
-                        .findByStaffId(username)
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "User not found")));
-    }
+                System.out.println("================= Debug =====================");
+                System.out.println("UserName:-" + username);
+                System.out.println("================= Debug =====================");
+
+                // Try phoneNumber first (Patient)
+                return userRepository
+                                .findByPhoneNumber(username)
+                                .orElseGet(() -> userRepository
+                                                .findByStaffId(username)
+                                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                                "User not found")));
+        }
 }

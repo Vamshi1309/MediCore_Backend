@@ -6,6 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.vamshi.HospitalManagementSystem.common.enums.Role;
+import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
+import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
 import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final DoctorProfileRepository doctorProfileRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${admin.phone}")
@@ -79,19 +82,45 @@ public class DataInitializer implements CommandLineRunner {
 
         for (int i = 1; i <= 3; i++) {
 
-            saveIfNotExists(
+            final int doctorNumber = i;
 
-                    UserEntity.builder()
-                            .name("Doctor " + i)
-                            .staffId(String.format("DOC-%04d", i))
-                            .phoneNumber(String.format("900000000%d", i))
-                            .email("doctor" + i + "@hospital.com")
-                            .password(passwordEncoder.encode("doctor123"))
-                            .role(Role.DOCTOR)
-                            .isActive(true)
-                            .build()
+            String staffId = String.format("DOC-%04d", doctorNumber);
 
-            );
+            UserEntity user = userRepository
+                    .findByStaffId(staffId)
+                    .orElseGet(() -> {
+
+                        UserEntity newUser = UserEntity.builder()
+                                .name("Doctor " + doctorNumber)
+                                .staffId(staffId)
+                                .phoneNumber(String.format("900000000%d", doctorNumber))
+                                .email("doctor" + doctorNumber + "@hospital.com")
+                                .password(passwordEncoder.encode("doctor123"))
+                                .role(Role.DOCTOR)
+                                .isActive(true)
+                                .build();
+
+                        UserEntity saved = userRepository.save(newUser);
+
+                        log.info("Created DOCTOR - {}", saved.getName());
+
+                        return saved;
+                    });
+
+            // Create profile if it doesn't already exist
+            if (doctorProfileRepository.findByUserId(user.getId()).isEmpty()) {
+
+                DoctorProfileEntity doctorProfile = DoctorProfileEntity.builder()
+                        .user(user)
+                        .specialization("Specialization " + doctorNumber)
+                        .qualification("MBBS")
+                        .experienceInYears(doctorNumber * 2)
+                        .build();
+
+                doctorProfileRepository.save(doctorProfile);
+
+                log.info("Created doctor profile for {}", staffId);
+            }
         }
     }
 

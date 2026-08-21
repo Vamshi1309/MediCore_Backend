@@ -83,12 +83,17 @@ public class AuthServiceImpl implements AuthService {
 
         @Override
         public AuthResponse staffLogin(StaffLoginRequest request) {
+
                 authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getStaffId(),
                                 request.getPassword()));
 
                 UserEntity user = userRepository.findByStaffIdAndRoleNot(
                                 request.getStaffId(), Role.PATIENT)
                                 .orElseThrow(() -> new ResourceNotFoundException("User not exist"));
+
+                System.out.println("========DEBUG===========");
+                System.out.println("USER :- " + user);
+                System.out.println("========DEBUG===========");
 
                 if (user.getRole() == Role.PATIENT) {
                         throw new UnauthorizedRoleException(

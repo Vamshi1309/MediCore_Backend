@@ -7,7 +7,6 @@ import com.vamshi.HospitalManagementSystem.patient.dtos.UpdatePatientProfileRequ
 import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity;
 import com.vamshi.HospitalManagementSystem.patient.repositories.PatientProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
-import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 public class PatientServiceImpl implements PatientService {
 
     private final PatientProfileRepository patientRepository;
-    private final UserRepository userRepository;
     private final AuthUtil authUtil;
 
     @Override

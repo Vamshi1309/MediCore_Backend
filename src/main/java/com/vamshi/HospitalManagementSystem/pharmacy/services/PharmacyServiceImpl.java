@@ -22,7 +22,6 @@ import com.vamshi.HospitalManagementSystem.pharmacy.repositories.DispenseReposit
 import com.vamshi.HospitalManagementSystem.prescription.entities.PrescriptionEntity;
 import com.vamshi.HospitalManagementSystem.prescription.repositories.PrescriptionRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
-import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +32,6 @@ public class PharmacyServiceImpl implements PharmacyService {
 	private final DispenseRepository dispenseRepository;
 	private final InventoryService inventoryService;
 	private final InventoryRepository inventoryRepository;
-	private final UserRepository userRepository;
 	private final PrescriptionRepository prescriptionRepository;
 	private final AuthUtil authUtil;
 

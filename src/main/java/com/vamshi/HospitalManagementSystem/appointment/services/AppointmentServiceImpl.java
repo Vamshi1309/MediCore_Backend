@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vamshi.HospitalManagementSystem.appointment.dtos.AppointmentResponse;
@@ -39,7 +38,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         @Override
         public AppointmentResponse createAppointment(CreateAppointmentRequest request) {
 
-                // Replace above 6 lines with:
+             
                 UserEntity createdBy = authUtil.getLoggedInUser();
                 Optional<UserEntity> patientOptional = userRepository.findById(request.getPatientId());
                 if (patientOptional.isEmpty()) {

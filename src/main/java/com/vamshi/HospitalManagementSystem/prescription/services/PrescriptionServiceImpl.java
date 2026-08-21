@@ -5,7 +5,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.vamshi.HospitalManagementSystem.prescription.dtos.PrescriptionItemRequest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +23,6 @@ import com.vamshi.HospitalManagementSystem.prescription.entities.PrescriptionEnt
 import com.vamshi.HospitalManagementSystem.prescription.entities.PrescriptionItemEntity;
 import com.vamshi.HospitalManagementSystem.prescription.repositories.PrescriptionRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
-import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,7 +36,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         private final DoctorProfileRepository doctorProfileRepository;
 
-        //private final UserRepository userRepository;
+        // private final UserRepository userRepository;
 
         private final AuthUtil authUtil;
 
@@ -93,13 +91,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         @Override
         public List<PrescriptionResponse> getPrescriptionsByDoctor(UUID doctorId) {
-
                 List<PrescriptionEntity> prescriptions = prescriptionRepository.findByDoctorId(doctorId);
-
-                if (prescriptions.isEmpty()) {
-                        throw new ResourceNotFoundException(
-                                        "No prescriptions found for this doctor");
-                }
 
                 return prescriptions.stream()
                                 .map(this::mapToResponse)
@@ -109,11 +101,6 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         @Override
         public List<PrescriptionResponse> getPrescriptionsByPatient(UUID patientId) {
                 List<PrescriptionEntity> prescriptions = prescriptionRepository.findByPatientId(patientId);
-
-                if (prescriptions.isEmpty()) {
-                        throw new ResourceNotFoundException(
-                                        "No prescriptions found for this patient");
-                }
 
                 return prescriptions.stream()
                                 .map(this::mapToResponse)

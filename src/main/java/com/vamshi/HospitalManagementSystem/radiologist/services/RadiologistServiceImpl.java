@@ -7,7 +7,6 @@ import com.vamshi.HospitalManagementSystem.radiologist.dtos.UpdateRadiologistPro
 import com.vamshi.HospitalManagementSystem.radiologist.entities.RadiologistEntity;
 import com.vamshi.HospitalManagementSystem.radiologist.repositories.RadiologistProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
-import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 

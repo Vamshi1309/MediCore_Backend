@@ -16,7 +16,6 @@ import com.vamshi.HospitalManagementSystem.labreport.dtos.LabReportResponse;
 import com.vamshi.HospitalManagementSystem.labreport.entities.LabReportEntity;
 import com.vamshi.HospitalManagementSystem.labreport.repositories.LabReportRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
-import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +25,6 @@ public class LabReportServiceImpl implements LabReportService {
 
 	private final LabReportRepository labReportRepository;
 	private final AppointmentRepository appointmentRepository;
-	private final UserRepository userRepository;
 	private final S3Service s3Service;
 	private final AuthUtil authUtil;
 

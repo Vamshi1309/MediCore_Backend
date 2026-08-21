@@ -56,6 +56,7 @@ public class PrescriptionEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<PrescriptionItemEntity> items = new ArrayList<>();
 

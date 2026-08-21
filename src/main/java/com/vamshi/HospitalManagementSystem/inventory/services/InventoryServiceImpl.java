@@ -16,7 +16,6 @@ import com.vamshi.HospitalManagementSystem.inventory.dtos.UpdateMedicineRequest;
 import com.vamshi.HospitalManagementSystem.inventory.entities.MedicineEntity;
 import com.vamshi.HospitalManagementSystem.inventory.repositories.InventoryRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
-import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 public class InventoryServiceImpl implements InventoryService {
 
     private final InventoryRepository inventoryRepository;
-    private final UserRepository userRepository;
     private final AuthUtil authUtil;
 
     @Override
