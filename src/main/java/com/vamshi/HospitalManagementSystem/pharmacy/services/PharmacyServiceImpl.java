@@ -29,15 +29,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PharmacyServiceImpl implements PharmacyService {
 
-	private final DispenseRepository dispenseRepository;
-	private final InventoryService inventoryService;
-	private final InventoryRepository inventoryRepository;
-	private final PrescriptionRepository prescriptionRepository;
-	private final AuthUtil authUtil;
+        private final DispenseRepository dispenseRepository;
+        private final InventoryService inventoryService;
+        private final InventoryRepository inventoryRepository;
+        private final PrescriptionRepository prescriptionRepository;
+        private final AuthUtil authUtil;
 
-	@Override
-	public DispenseResponse dispenseMedicine(DispenseMedicineRequest request) {
-		UserEntity pharmacist = authUtil.getLoggedInUser();
+        @Override
+        public DispenseResponse dispenseMedicine(DispenseMedicineRequest request) {
+                UserEntity pharmacist = authUtil.getLoggedInUser();
 
                 PrescriptionEntity prescription = prescriptionRepository
                                 .findById(request.getPrescriptionId())
@@ -65,7 +65,7 @@ public class PharmacyServiceImpl implements PharmacyService {
 
                         double itemTotal = medicine.getPrice()
                                         * item.getQuantityDispensed();
-                        
+
                         totalAmount += itemTotal;
 
                         dispenseList.add(DispenseEntity.builder()
@@ -117,11 +117,6 @@ public class PharmacyServiceImpl implements PharmacyService {
 
                 List<DispenseEntity> history = dispenseRepository
                                 .findByPatientIdOrderByDispensedAtDesc(patientId);
-
-                if (history.isEmpty()) {
-                        throw new ResourceNotFoundException(
-                                        "No dispense history found for this patient");
-                }
 
                 return history.stream()
                                 .map(this::mapToResponse)

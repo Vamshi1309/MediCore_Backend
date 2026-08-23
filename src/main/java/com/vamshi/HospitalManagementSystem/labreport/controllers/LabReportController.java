@@ -75,5 +75,4 @@ public class LabReportController {
                 ApiResponse.success(
                         "Download URL generated", downloadUrl));
     }
-
 }
