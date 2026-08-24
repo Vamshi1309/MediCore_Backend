@@ -44,19 +44,18 @@ public class S3Service {
         }
     }
 
-    public String generateDownloadUrl(String fileKey){
+    public String generateDownloadUrl(String fileKey) {
         GetObjectRequest getRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(fileKey)
                 .build();
 
         GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                                                 .signatureDuration(Duration.ofMinutes(10))
-                                                 .getObjectRequest(getRequest)
-                                                 .build();
+                .signatureDuration(Duration.ofMinutes(10))
+                .getObjectRequest(getRequest)
+                .build();
 
-        PresignedGetObjectRequest presignedRequest =
-                s3Presigner.presignGetObject(presignRequest);
+        PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
 
         return presignedRequest.url().toString();
     }

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import com.vamshi.HospitalManagementSystem.common.enums.Role;
 import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
+import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity;
+import com.vamshi.HospitalManagementSystem.patient.repositories.PatientProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
 import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
@@ -22,6 +24,7 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final DoctorProfileRepository doctorProfileRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PatientProfileRepository patientProfileRepository;
 
     @Value("${admin.phone}")
     private String adminPhone;
@@ -188,28 +191,82 @@ public class DataInitializer implements CommandLineRunner {
 
         for (int i = 1; i <= 5; i++) {
 
-            saveIfNotExists(
+            final int patientNumber = i;
 
-                    UserEntity.builder()
-                            .name("Patient " + i)
-                            .phoneNumber(String.format("940000000%d", i))
-                            .email("patient" + i + "@gmail.com")
-                            .password(passwordEncoder.encode("patient123"))
-                            .role(Role.PATIENT)
-                            .isActive(true)
-                            .build()
+            String phoneNumber = String.format("940000000%d", patientNumber);
 
-            );
+            UserEntity user = userRepository
+                    .findByPhoneNumber(phoneNumber)
+                    .orElseGet(() -> {
+
+                        UserEntity newUser = UserEntity.builder()
+                                .name("Patient " + patientNumber)
+                                .phoneNumber(phoneNumber)
+                                .email("patient" + patientNumber + "@gmail.com")
+                                .password(passwordEncoder.encode("patient123"))
+                                .role(Role.PATIENT)
+                                .isActive(true)
+                                .build();
+
+                        UserEntity saved = userRepository.save(newUser);
+
+                        log.info("Created PATIENT - {}", saved.getName());
+
+                        return saved;
+                    });
+
+            if (patientProfileRepository.findByUserId(user.getId()).isEmpty()) {
+
+                PatientProfileEntity patientProfile = PatientProfileEntity.builder()
+                        .user(user)
+                        .dateOfBirth("2000-01-01")
+                        .bloodGroup("O+")
+                        .emergencyContact("9000000000")
+                        .insuranceInfo("Health Insurance")
+                        .build();
+
+                patientProfileRepository.save(patientProfile);
+
+                log.info("Created patient profile for {}", user.getName());
+            }
         }
 
-        saveIfNotExists(
-                UserEntity.builder()
-                        .name("vamshi")
-                        .phoneNumber("8639933075")
-                        .email("vamshi@hospital.com")
-                        .password(passwordEncoder.encode("test@123"))
-                        .role(Role.PATIENT)
-                        .isActive(true)
-                        .build());
+        // Vamshi test patient
+        String phoneNumber = "8639933075";
+
+        UserEntity user = userRepository
+                .findByPhoneNumber(phoneNumber)
+                .orElseGet(() -> {
+
+                    UserEntity newUser = UserEntity.builder()
+                            .name("vamshi")
+                            .phoneNumber(phoneNumber)
+                            .email("vamshi@hospital.com")
+                            .password(passwordEncoder.encode("test@123"))
+                            .role(Role.PATIENT)
+                            .isActive(true)
+                            .build();
+
+                    UserEntity saved = userRepository.save(newUser);
+
+                    log.info("Created PATIENT - {}", saved.getName());
+
+                    return saved;
+                });
+
+        if (patientProfileRepository.findByUserId(user.getId()).isEmpty()) {
+
+            PatientProfileEntity patientProfile = PatientProfileEntity.builder()
+                    .user(user)
+                    .dateOfBirth("2000-01-01")
+                    .bloodGroup("O+")
+                    .emergencyContact(phoneNumber)
+                    .insuranceInfo("Health Insurance")
+                    .build();
+
+            patientProfileRepository.save(patientProfile);
+
+            log.info("Created patient profile for {}", user.getName());
+        }
     }
 }
