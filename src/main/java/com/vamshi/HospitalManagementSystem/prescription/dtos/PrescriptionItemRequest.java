@@ -1,5 +1,7 @@
 package com.vamshi.HospitalManagementSystem.prescription.dtos;
 
+import java.util.UUID;
+
 import com.vamshi.HospitalManagementSystem.common.enums.MedicineFrequency;
 
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +14,7 @@ import lombok.Setter;
 public class PrescriptionItemRequest {
 
     @NotBlank(message = "medicineName is required")
-    private String medicineName;
+    private UUID medicineId;
 
     @NotBlank(message = "dosage is required")
     private String dosage;

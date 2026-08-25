@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
@@ -36,6 +37,7 @@ public class PharmacyServiceImpl implements PharmacyService {
         private final AuthUtil authUtil;
 
         @Override
+        @Transactional
         public DispenseResponse dispenseMedicine(DispenseMedicineRequest request) {
                 UserEntity pharmacist = authUtil.getLoggedInUser();
 

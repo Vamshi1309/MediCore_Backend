@@ -27,7 +27,7 @@ public class PdfGeneratorService {
                         PdfDocument pdfDoc = new PdfDocument(writer);
                         Document document = new Document(pdfDoc);
 
-                        Paragraph title = new Paragraph("HOSPITAL MANAGEMENT SYSTEM")
+                        Paragraph title = new Paragraph("MediCore Hospitals")
                                         .setFontSize(18)
                                         .setBold()
                                         .setTextAlignment(TextAlignment.CENTER);
@@ -71,7 +71,7 @@ public class PdfGeneratorService {
                                 table.addCell(new Cell().add(
                                                 new Paragraph(String.valueOf(count++))));
                                 table.addCell(new Cell().add(
-                                                new Paragraph(item.getMedicineName())));
+                                                new Paragraph(item.getMedicine().getMedicineName())));
                                 table.addCell(new Cell().add(
                                                 new Paragraph(item.getDosage())));
                                 table.addCell(new Cell().add(

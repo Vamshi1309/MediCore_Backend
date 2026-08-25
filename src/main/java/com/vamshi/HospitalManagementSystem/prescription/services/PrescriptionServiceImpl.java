@@ -2,9 +2,6 @@ package com.vamshi.HospitalManagementSystem.prescription.services;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import com.vamshi.HospitalManagementSystem.prescription.dtos.PrescriptionItemRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +13,8 @@ import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
+import com.vamshi.HospitalManagementSystem.inventory.entities.MedicineEntity;
+import com.vamshi.HospitalManagementSystem.inventory.repositories.InventoryRepository;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.CreatePrescriptionRequest;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.PrescriptionItemResponse;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.PrescriptionResponse;
@@ -35,6 +34,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         private final AppointmentRepository appointmentRepository;
 
         private final DoctorProfileRepository doctorProfileRepository;
+
+        private final InventoryRepository inventoryRepository;
 
         // private final UserRepository userRepository;
 
@@ -64,15 +65,24 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
                 List<PrescriptionItemEntity> items = request.getItems()
                                 .stream()
-                                .map((PrescriptionItemRequest itemRequest) -> PrescriptionItemEntity.builder()
-                                                .medicineName(itemRequest.getMedicineName())
-                                                .dosage(itemRequest.getDosage())
-                                                .duration(itemRequest.getDurationDays())
-                                                .instructions(itemRequest.getInstructions())
-                                                .frequency(itemRequest.getFrequency())
-                                                .prescription(prescription)
-                                                .build())
-                                .collect(Collectors.toList());
+                                .map(itemRequest -> {
+
+                                        MedicineEntity medicine = inventoryRepository
+                                                        .findById(itemRequest.getMedicineId())
+                                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                                        "Medicine not found: "
+                                                                                        + itemRequest.getMedicineId()));
+
+                                        return PrescriptionItemEntity.builder()
+                                                        .medicine(medicine)
+                                                        .dosage(itemRequest.getDosage())
+                                                        .duration(itemRequest.getDurationDays())
+                                                        .instructions(itemRequest.getInstructions())
+                                                        .frequency(itemRequest.getFrequency())
+                                                        .prescription(prescription)
+                                                        .build();
+                                })
+                                .toList();
 
                 prescription.setItems(items);
 
@@ -135,9 +145,11 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         private PrescriptionItemResponse mapItemToResponse(
                         PrescriptionItemEntity item) {
+
                 return PrescriptionItemResponse.builder()
                                 .itemId(item.getId())
-                                .medicineName(item.getMedicineName())
+                                .medicineId(item.getMedicine().getId())
+                                .medicineName(item.getMedicine().getMedicineName())
                                 .dosage(item.getDosage())
                                 .instructions(item.getInstructions())
                                 .durationInDays(item.getDuration())

@@ -17,4 +17,5 @@ public interface PrescriptionService {
     List<PrescriptionResponse> getPrescriptionsByPatient(UUID patientId);
 
     PrescriptionEntity getPrescriptionEntityById(UUID id);
+
 }

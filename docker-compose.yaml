@@ -1,45 +1,64 @@
-  services:
-    backend:
-      image: ghcr.io/vamshi1309/hospitalmanagementsystem-backend:latest
-      container_name: hosptial-backend
+services:
+  backend:
+    image: ghcr.io/vamshi1309/hospitalmanagementsystem-backend:latest
+    container_name: hosptial-backend
 
-      ports:
-        - "8081:8080"
-      
-      env_file:
-        - .env
-      
-      depends_on:
-        - postgres
-        - redis
-      
-      restart: unless-stopped
+    ports:
+      - "8081:8080"
 
-    postgres:
-      image: postgres:17
-      container_name: hospital-postgres
+    env_file:
+      - .env
 
-      environment:
-        POSTGRES_DB: ${DB_NAME}
-        POSTGRES_USER: ${DB_USERNAME}
-        POSTGRES_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - postgres
+      - redis
+      - localstack
 
-      ports:
-        - "5432:5432"
-      
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
-      restart: unless-stopped
+  postgres:
+    image: postgres:17
+    container_name: hospital-postgres
 
-    redis:
-      image: redis:7-alpine
-      container_name: hospital-redis
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
 
-      ports:
-        - "6389:6379"
+    ports:
+      - "5432:5432"
 
-      restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-  volumes:
-    postgres_data:
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: hospital-redis
+
+    ports:
+      - "6389:6379"
+
+    restart: unless-stopped
+
+  localstack:
+    image: localstack/localstack:3.8.1
+    container_name: hospital-localstack
+
+    ports:
+      - "4566:4566"
+
+    environment:
+      - SERVICES=s3
+      - DEBUG=0
+
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  localstack_data:

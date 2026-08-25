@@ -7,6 +7,9 @@ import lombok.Setter;
 @Setter
 public class UpdatePatientProfileRequest {
 
+    private String name;
+    private String email;
+    private String phoneNumber;
     private String dateOfBirth;
     private String bloodGroup;
     private String emergencyContact;
