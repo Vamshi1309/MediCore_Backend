@@ -9,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.vamshi.HospitalManagementSystem.appointment.entities.AppointmentEntity;
 import com.vamshi.HospitalManagementSystem.appointment.repositories.AppointmentRepository;
 import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
-import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.labreport.dtos.CreateLabReportRequest;
 import com.vamshi.HospitalManagementSystem.labreport.dtos.LabReportResponse;
@@ -23,24 +22,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LabReportServiceImpl implements LabReportService {
 
-	private final LabReportRepository labReportRepository;
-	private final AppointmentRepository appointmentRepository;
-	private final S3Service s3Service;
-	private final AuthUtil authUtil;
+        private final LabReportRepository labReportRepository;
+        private final AppointmentRepository appointmentRepository;
+        private final S3Service s3Service;
+        private final AuthUtil authUtil;
 
-	@Override
-	public LabReportResponse createLabReport(CreateLabReportRequest request, MultipartFile file) {
-		UserEntity radiologist = authUtil.getLoggedInUser();
+        @Override
+        public LabReportResponse createLabReport(CreateLabReportRequest request, MultipartFile file) {
+                UserEntity radiologist = authUtil.getLoggedInUser();
 
                 AppointmentEntity appointment = appointmentRepository.findById(request.getAppointmentId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
-
-
-                if (labReportRepository.existsByAppointmentId(
-                                appointment.getId())) {
-                        throw new ResourceAlreadyExistsException(
-                                        "Report already exists");
-                }
 
                 String fileKey = s3Service.uploadFile(file);
 

@@ -101,6 +101,9 @@ public class JwtFilter extends OncePerRequestFilter {
                                         token,
                                         userDetails)) {
 
+                                System.out.println("USER = " + userDetails.getUsername());
+                                System.out.println("AUTHORITIES = " + userDetails.getAuthorities());
+
                                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                                                 userDetails,
                                                 null,

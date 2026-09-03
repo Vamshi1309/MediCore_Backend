@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vamshi.HospitalManagementSystem.common.ApiResponse;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.CreatePrescriptionRequest;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.PrescriptionResponse;
+import com.vamshi.HospitalManagementSystem.prescription.dtos.UpdatePrescriptionRequest;
 import com.vamshi.HospitalManagementSystem.prescription.entities.PrescriptionEntity;
 import com.vamshi.HospitalManagementSystem.prescription.services.PdfGeneratorService;
 import com.vamshi.HospitalManagementSystem.prescription.services.PrescriptionService;
@@ -30,64 +32,80 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PrescriptionController {
 
-    private final PrescriptionService prescriptionService;
+        private final PrescriptionService prescriptionService;
 
-    private final PdfGeneratorService pdfGeneratorService;
+        private final PdfGeneratorService pdfGeneratorService;
 
-    @PostMapping()
-    public ResponseEntity<ApiResponse<PrescriptionResponse>> createPrescription(
-            @Valid @RequestBody CreatePrescriptionRequest request) {
-        PrescriptionResponse response = prescriptionService.createPrescription(request);
+        @PostMapping()
+        public ResponseEntity<ApiResponse<PrescriptionResponse>> createPrescription(
+                        @Valid @RequestBody CreatePrescriptionRequest request) {
+                PrescriptionResponse response = prescriptionService.createPrescription(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Prescription Created Successfully ", response));
-    }
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                .body(ApiResponse.success("Prescription Created Successfully ", response));
+        }
 
-    @GetMapping("/{id}")
-    @Transactional
-    public ResponseEntity<ApiResponse<PrescriptionResponse>> getPrescriptionById(@PathVariable UUID id) {
-        PrescriptionResponse response = prescriptionService.getPrescriptionById(id);
+        @GetMapping("/{id}")
+        @Transactional
+        public ResponseEntity<ApiResponse<PrescriptionResponse>> getPrescriptionById(@PathVariable UUID id) {
+                PrescriptionResponse response = prescriptionService.getPrescriptionById(id);
 
-        return ResponseEntity.ok(ApiResponse.success("Fetched Prescription by id Successfully", response));
-    }
+                return ResponseEntity.ok(ApiResponse.success("Fetched Prescription by id Successfully", response));
+        }
 
-    @GetMapping("/patient/{patientId}")
-    @Transactional
-    public ResponseEntity<ApiResponse<List<PrescriptionResponse>>> getPrescriptionByPatientId(
-            @PathVariable UUID patientId) {
-        List<PrescriptionResponse> response = prescriptionService.getPrescriptionsByPatient(patientId);
+        @GetMapping("/patient/{patientId}")
+        @Transactional
+        public ResponseEntity<ApiResponse<List<PrescriptionResponse>>> getPrescriptionByPatientId(
+                        @PathVariable UUID patientId) {
+                List<PrescriptionResponse> response = prescriptionService.getPrescriptionsByPatient(patientId);
 
-        return ResponseEntity.ok(ApiResponse.success("Fetched Prescriptions by Patient id Successfully", response));
-    }
+                return ResponseEntity
+                                .ok(ApiResponse.success("Fetched Prescriptions by Patient id Successfully", response));
+        }
 
-    @GetMapping("/doctor/{doctorId}")
-    @Transactional
-    public ResponseEntity<ApiResponse<List<PrescriptionResponse>>> getPrescriptionByDoctorId(
-            @PathVariable UUID doctorId) {
-        List<PrescriptionResponse> response = prescriptionService.getPrescriptionsByDoctor(doctorId);
+        @GetMapping("/doctor/{doctorId}")
+        @Transactional
+        public ResponseEntity<ApiResponse<List<PrescriptionResponse>>> getPrescriptionByDoctorId(
+                        @PathVariable UUID doctorId) {
+                List<PrescriptionResponse> response = prescriptionService.getPrescriptionsByDoctor(doctorId);
 
-        return ResponseEntity.ok(ApiResponse.success("Fetched Prescriptions by Doctor id Successfully", response));
-    }
+                return ResponseEntity
+                                .ok(ApiResponse.success("Fetched Prescriptions by Doctor id Successfully", response));
+        }
 
-    @GetMapping("{id}/download")
-    public ResponseEntity<byte[]> downloadPrescriptionPdf(
-            @PathVariable UUID id) {
+        @PutMapping("/{id}")
+        public ResponseEntity<ApiResponse<PrescriptionResponse>> updatePrescription(
+                        @PathVariable UUID id,
+                        @RequestBody @Valid UpdatePrescriptionRequest request) {
 
-        PrescriptionEntity prescription = prescriptionService
-                .getPrescriptionEntityById(id);
+                PrescriptionResponse response = prescriptionService
+                                .updatePrescription(id, request);
 
-        byte[] pdfBytes = pdfGeneratorService
-                .generatePrescriptionPdf(prescription);
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Prescription updated successfully",
+                                                response));
+        }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=prescription_"
-                        + id + ".pdf");
+        @GetMapping("{id}/download")
+        public ResponseEntity<byte[]> downloadPrescriptionPdf(
+                        @PathVariable UUID id) {
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdfBytes);
-    }
+                PrescriptionEntity prescription = prescriptionService
+                                .getPrescriptionEntityById(id);
+
+                byte[] pdfBytes = pdfGeneratorService
+                                .generatePrescriptionPdf(prescription);
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=prescription_"
+                                                + id + ".pdf");
+
+                return ResponseEntity.ok()
+                                .headers(headers)
+                                .contentType(MediaType.APPLICATION_PDF)
+                                .body(pdfBytes);
+        }
 
 }

@@ -1,6 +1,9 @@
 package com.vamshi.HospitalManagementSystem.doctor.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vamshi.HospitalManagementSystem.doctor.dtos.DoctorProfileResponse;
 import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
@@ -24,7 +27,7 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public DoctorProfileResponse getMyProfile() {
-        
+
         UserEntity user = authUtil.getLoggedInUser();
 
         DoctorProfileEntity doctor = doctorRepository.findByUserId(user.getId())
@@ -68,5 +71,15 @@ public class DoctorServiceImpl implements DoctorService {
                 .qualification(doctor.getQualification())
                 .availabilityJson(doctor.getAvailabilityJson())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public List<DoctorProfileResponse> getAllDoctors() {
+
+        return doctorRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 }

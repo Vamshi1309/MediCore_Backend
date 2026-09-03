@@ -54,7 +54,7 @@ public class SecurityConfig {
                                                                 "/api/auth/logout",
                                                                 "/api/auth/change-password")
                                                 .authenticated()
-                                
+
                                                 .requestMatchers(
                                                                 "/swagger-ui/**",
                                                                 "/swagger-ui.html",
@@ -99,6 +99,10 @@ public class SecurityConfig {
                                                                 "/api/prescriptions/patient/**")
                                                 .hasAnyRole("PATIENT", "DOCTOR", "PHARMACIST")
 
+                                                .requestMatchers(HttpMethod.PUT,
+                                                                "/api/prescriptions/**")
+                                                .hasRole("DOCTOR")
+
                                                 .requestMatchers(HttpMethod.GET,
                                                                 "/api/prescriptions/**")
                                                 .hasAnyRole("DOCTOR", "PATIENT", "PHARMACIST")
@@ -131,8 +135,12 @@ public class SecurityConfig {
                                                                 "/api/pharmacy/history/**")
                                                 .hasAnyRole("PHARMACIST", "PATIENT",
                                                                 "DOCTOR", "ADMIN")
+                                                .requestMatchers(HttpMethod.GET,
+                                                                "/api/doctor/all")
+                                                .hasAnyRole("PATIENT", "RECEPTIONIST")
                                                 .requestMatchers("/api/doctor/**")
                                                 .hasRole("DOCTOR")
+                                                
                                                 .anyRequest().authenticated())
                                 .addFilterBefore(
                                                 jwtFilter,

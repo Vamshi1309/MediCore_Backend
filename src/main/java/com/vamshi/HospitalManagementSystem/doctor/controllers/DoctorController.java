@@ -1,5 +1,7 @@
 package com.vamshi.HospitalManagementSystem.doctor.controllers;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,6 +39,17 @@ public class DoctorController {
         DoctorProfileResponse response = doctorService.updateMyProfile(request);
 
         return ResponseEntity.ok(ApiResponse.success("Profile Updated Successfully", response));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<DoctorProfileResponse>>> getAllDoctors() {
+
+        List<DoctorProfileResponse> doctors = doctorService.getAllDoctors();
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Doctors fetched successfully",
+                        doctors));
     }
 
 }
