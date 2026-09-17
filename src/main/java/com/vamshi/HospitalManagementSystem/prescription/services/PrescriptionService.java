@@ -19,6 +19,8 @@ public interface PrescriptionService {
 
     PrescriptionEntity getPrescriptionEntityById(UUID id);
 
+    PrescriptionResponse getPrescriptionByAppointmentId(UUID appointmentId);
+
     PrescriptionResponse updatePrescription(
             UUID prescriptionId,
             UpdatePrescriptionRequest request);

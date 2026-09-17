@@ -3,7 +3,6 @@ package com.vamshi.HospitalManagementSystem.prescription.entities;
 import java.util.UUID;
 
 import com.vamshi.HospitalManagementSystem.common.enums.MedicineFrequency;
-import com.vamshi.HospitalManagementSystem.inventory.entities.MedicineEntity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,9 +28,7 @@ public class PrescriptionItemEntity {
     @JoinColumn(name = "prescription_id", nullable = false)
     private PrescriptionEntity prescription;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "medicine_id", nullable = false)
-    private MedicineEntity medicine;
+    private String medicineName;
 
     @Column(nullable = false)
     private String dosage;

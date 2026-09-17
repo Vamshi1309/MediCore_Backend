@@ -13,8 +13,6 @@ import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
-import com.vamshi.HospitalManagementSystem.inventory.entities.MedicineEntity;
-import com.vamshi.HospitalManagementSystem.inventory.repositories.InventoryRepository;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.CreatePrescriptionRequest;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.PrescriptionItemResponse;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.PrescriptionResponse;
@@ -35,8 +33,6 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         private final AppointmentRepository appointmentRepository;
 
         private final DoctorProfileRepository doctorProfileRepository;
-
-        private final InventoryRepository inventoryRepository;
 
         // private final UserRepository userRepository;
 
@@ -68,14 +64,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                 .stream()
                                 .map(itemRequest -> {
 
-                                        MedicineEntity medicine = inventoryRepository
-                                                        .findById(itemRequest.getMedicineId())
-                                                        .orElseThrow(() -> new ResourceNotFoundException(
-                                                                        "Medicine not found: "
-                                                                                        + itemRequest.getMedicineId()));
-
                                         return PrescriptionItemEntity.builder()
-                                                        .medicine(medicine)
+                                                        .medicineName(itemRequest.getMedicineName()) // ← String
                                                         .dosage(itemRequest.getDosage())
                                                         .duration(itemRequest.getDurationDays())
                                                         .instructions(itemRequest.getInstructions())
@@ -149,8 +139,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
                 return PrescriptionItemResponse.builder()
                                 .itemId(item.getId())
-                                .medicineId(item.getMedicine().getId())
-                                .medicineName(item.getMedicine().getMedicineName())
+                                .medicineName(item.getMedicineName())
                                 .dosage(item.getDosage())
                                 .instructions(item.getInstructions())
                                 .durationInDays(item.getDuration())
@@ -189,46 +178,48 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Prescription not found"));
 
-                // Update notes if provided
                 if (request.getNotes() != null) {
                         prescription.setNotes(request.getNotes());
                 }
 
-                // Replace items if provided
                 if (request.getItems() != null
                                 && !request.getItems().isEmpty()) {
 
-                        // clear old items
                         prescription.getItems().clear();
 
-                        // add new items
-                        List<PrescriptionItemEntity> newItems = request.getItems()
+                        List<PrescriptionItemEntity> newItems = request
+                                        .getItems()
                                         .stream()
-                                        .map(item -> {
-
-                                                MedicineEntity medicine = inventoryRepository
-                                                                .findById(item.getMedicineId())
-                                                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                                                "Medicine not found: " + item
-                                                                                                .getMedicineId()));
-
-                                                return PrescriptionItemEntity.builder()
-                                                                .medicine(medicine)
-                                                                .dosage(item.getDosage())
-                                                                .duration(item.getDurationDays())
-                                                                .instructions(item.getInstructions())
-                                                                .frequency(item.getFrequency())
-                                                                .prescription(prescription)
-                                                                .build();
-                                        })
+                                        .map(item -> PrescriptionItemEntity.builder()
+                                                        .medicineName(
+                                                                        item.getMedicineName()) // ← fixed
+                                                        .dosage(item.getDosage())
+                                                        .duration(item.getDurationDays())
+                                                        .instructions(
+                                                                        item.getInstructions())
+                                                        .frequency(item.getFrequency())
+                                                        .prescription(prescription)
+                                                        .build())
                                         .toList();
 
                         prescription.getItems().addAll(newItems);
                 }
 
-                PrescriptionEntity saved = prescriptionRepository.save(prescription);
+                PrescriptionEntity saved = prescriptionRepository
+                                .save(prescription);
 
                 return mapToResponse(saved);
+        }
+
+        @Override
+        public PrescriptionResponse getPrescriptionByAppointmentId(UUID appointmentId) {
+
+                PrescriptionEntity prescription = prescriptionRepository.findByAppointmentId(appointmentId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Prescription not found for appointment: "
+                                                                + appointmentId));
+
+                return mapToResponse(prescription);
         }
 
 }

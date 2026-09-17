@@ -87,7 +87,7 @@ public class PrescriptionController {
                                                 response));
         }
 
-        @GetMapping("{id}/download")
+        @GetMapping("/{id}/download")
         public ResponseEntity<byte[]> downloadPrescriptionPdf(
                         @PathVariable UUID id) {
 
@@ -106,6 +106,15 @@ public class PrescriptionController {
                                 .headers(headers)
                                 .contentType(MediaType.APPLICATION_PDF)
                                 .body(pdfBytes);
+        }
+
+        @GetMapping("/appointment/{appointmentId}")
+        public ResponseEntity<ApiResponse<PrescriptionResponse>> getPrescriptionByAppointmentId(
+                        @PathVariable UUID appointmentId) {
+                PrescriptionResponse response = prescriptionService.getPrescriptionByAppointmentId(appointmentId);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success("Prescription fetched successfully", response));
         }
 
 }
