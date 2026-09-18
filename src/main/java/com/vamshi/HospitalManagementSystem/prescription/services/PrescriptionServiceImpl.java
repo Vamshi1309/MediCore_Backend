@@ -21,6 +21,8 @@ import com.vamshi.HospitalManagementSystem.prescription.entities.PrescriptionEnt
 import com.vamshi.HospitalManagementSystem.prescription.entities.PrescriptionItemEntity;
 import com.vamshi.HospitalManagementSystem.prescription.repositories.PrescriptionRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
+import com.vamshi.HospitalManagementSystem.inventory.repositories.InventoryRepository;
+import com.vamshi.HospitalManagementSystem.inventory.entities.MedicineEntity;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +35,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         private final AppointmentRepository appointmentRepository;
 
         private final DoctorProfileRepository doctorProfileRepository;
+
+        private final InventoryRepository inventoryRepository;
 
         // private final UserRepository userRepository;
 
@@ -64,8 +68,14 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                 .stream()
                                 .map(itemRequest -> {
 
+                                        MedicineEntity medicine = inventoryRepository
+                                                        .findById(itemRequest.getMedicineId())
+                                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                                        "Medicine not found: "
+                                                                                        + itemRequest.getMedicineId()));
+
                                         return PrescriptionItemEntity.builder()
-                                                        .medicineName(itemRequest.getMedicineName()) // ← String
+                                                        .medicine(medicine)
                                                         .dosage(itemRequest.getDosage())
                                                         .duration(itemRequest.getDurationDays())
                                                         .instructions(itemRequest.getInstructions())
@@ -139,7 +149,14 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
                 return PrescriptionItemResponse.builder()
                                 .itemId(item.getId())
-                                .medicineName(item.getMedicineName())
+                                .medicineId(
+                                                item.getMedicine() != null
+                                                                ? item.getMedicine().getId()
+                                                                : null)
+                                .medicineName(
+                                                item.getMedicine() != null
+                                                                ? item.getMedicine().getMedicineName()
+                                                                : null)
                                 .dosage(item.getDosage())
                                 .instructions(item.getInstructions())
                                 .durationInDays(item.getDuration())
@@ -151,18 +168,18 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         @Transactional
         public PrescriptionEntity getPrescriptionEntityById(UUID id) {
 
-                System.out.println("=== METHOD STARTED ===");
+                // System.out.println("=== METHOD STARTED ===");
 
                 PrescriptionEntity prescription = prescriptionRepository
                                 .findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Prescription not found"));
 
-                System.out.println("=== PRESCRIPTION FOUND ===");
+                // System.out.println("=== PRESCRIPTION FOUND ===");
 
-                int size = prescription.getItems().size();
+                // int size = prescription.getItems().size();
 
-                System.out.println("=== ITEMS SIZE: " + size + " ===");
+                // System.out.println("=== ITEMS SIZE: " + size + " ===");
 
                 return prescription;
         }
@@ -190,16 +207,23 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                         List<PrescriptionItemEntity> newItems = request
                                         .getItems()
                                         .stream()
-                                        .map(item -> PrescriptionItemEntity.builder()
-                                                        .medicineName(
-                                                                        item.getMedicineName()) // ← fixed
-                                                        .dosage(item.getDosage())
-                                                        .duration(item.getDurationDays())
-                                                        .instructions(
-                                                                        item.getInstructions())
-                                                        .frequency(item.getFrequency())
-                                                        .prescription(prescription)
-                                                        .build())
+                                        .map(item -> {
+
+                                                MedicineEntity medicine = inventoryRepository
+                                                                .findById(item.getMedicineId())
+                                                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                                                "Medicine not found: " + item
+                                                                                                .getMedicineId()));
+
+                                                return PrescriptionItemEntity.builder()
+                                                                .medicine(medicine)
+                                                                .dosage(item.getDosage())
+                                                                .duration(item.getDurationDays())
+                                                                .instructions(item.getInstructions())
+                                                                .frequency(item.getFrequency())
+                                                                .prescription(prescription)
+                                                                .build();
+                                        })
                                         .toList();
 
                         prescription.getItems().addAll(newItems);
@@ -212,6 +236,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         }
 
         @Override
+        @Transactional(readOnly = true)
         public PrescriptionResponse getPrescriptionByAppointmentId(UUID appointmentId) {
 
                 PrescriptionEntity prescription = prescriptionRepository.findByAppointmentId(appointmentId)
