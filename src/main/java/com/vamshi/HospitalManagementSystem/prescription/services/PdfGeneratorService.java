@@ -71,10 +71,11 @@ public class PdfGeneratorService {
                                 table.addCell(new Cell().add(
                                                 new Paragraph(String.valueOf(count++))));
                                 table.addCell(new Cell().add(
-                                                new Paragraph(
-                                                                item.getMedicine() != null
-                                                                                ? item.getMedicine().getMedicineName()
-                                                                                : "-")));
+        new Paragraph(
+                item.getMedicine() != null
+                        ? item.getMedicine().getMedicineName()
+                        : "-"
+        )));
                                 table.addCell(new Cell().add(
                                                 new Paragraph(item.getDosage())));
                                 table.addCell(new Cell().add(

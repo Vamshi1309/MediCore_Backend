@@ -19,8 +19,6 @@ import com.vamshi.HospitalManagementSystem.common.ApiResponse;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.CreatePrescriptionRequest;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.PrescriptionResponse;
 import com.vamshi.HospitalManagementSystem.prescription.dtos.UpdatePrescriptionRequest;
-import com.vamshi.HospitalManagementSystem.prescription.entities.PrescriptionEntity;
-import com.vamshi.HospitalManagementSystem.prescription.services.PdfGeneratorService;
 import com.vamshi.HospitalManagementSystem.prescription.services.PrescriptionService;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +32,6 @@ public class PrescriptionController {
 
         private final PrescriptionService prescriptionService;
 
-        private final PdfGeneratorService pdfGeneratorService;
 
         @PostMapping()
         public ResponseEntity<ApiResponse<PrescriptionResponse>> createPrescription(
@@ -91,16 +88,13 @@ public class PrescriptionController {
         public ResponseEntity<byte[]> downloadPrescriptionPdf(
                         @PathVariable UUID id) {
 
-                PrescriptionEntity prescription = prescriptionService
-                                .getPrescriptionEntityById(id);
-
-                byte[] pdfBytes = pdfGeneratorService
-                                .generatePrescriptionPdf(prescription);
+                byte[] pdfBytes = prescriptionService.downloadPrescriptionPdf(id);
 
                 HttpHeaders headers = new HttpHeaders();
-                headers.add(HttpHeaders.CONTENT_DISPOSITION,
-                                "attachment; filename=prescription_"
-                                                + id + ".pdf");
+
+                headers.add(
+                                HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=prescription_" + id + ".pdf");
 
                 return ResponseEntity.ok()
                                 .headers(headers)

@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 public class PrescriptionItemRequest {
 
-    @NotBlank(message = "medicineId is required")
+    @NotNull(message = "medicineId is required")
     private UUID medicineId;
 
     @NotBlank(message = "dosage is required")

@@ -24,4 +24,6 @@ public interface PrescriptionService {
     PrescriptionResponse updatePrescription(
             UUID prescriptionId,
             UpdatePrescriptionRequest request);
+
+    public byte[] downloadPrescriptionPdf(UUID id);
 }

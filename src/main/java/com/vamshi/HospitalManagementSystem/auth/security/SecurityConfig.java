@@ -117,7 +117,7 @@ public class SecurityConfig {
                                                 .hasAnyRole("RADIOLOGIST", "DOCTOR",
                                                                 "PATIENT", "ADMIN")
                                                 .requestMatchers("/api/inventory/**")
-                                                .hasAnyRole("PHARMACIST", "ADMIN")
+                                                .hasAnyRole("PHARMACIST", "ADMIN","DOCTOR")
                                                 .requestMatchers(HttpMethod.POST,
                                                                 "/api/pharmacy/dispense")
                                                 .hasRole("PHARMACIST")

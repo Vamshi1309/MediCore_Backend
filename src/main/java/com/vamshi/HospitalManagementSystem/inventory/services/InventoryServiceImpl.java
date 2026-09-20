@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vamshi.HospitalManagementSystem.exceptions.BadRequestException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
@@ -81,6 +82,7 @@ public class InventoryServiceImpl implements InventoryService {
                                 "Medicine not found with id: " + id)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<MedicineResponse> getAllMedicines() {
         return inventoryRepository.findAll()

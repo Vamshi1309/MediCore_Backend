@@ -38,6 +38,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         private final InventoryRepository inventoryRepository;
 
+        private final PdfGeneratorService pdfGeneratorService;
+
         // private final UserRepository userRepository;
 
         private final AuthUtil authUtil;
@@ -245,6 +247,21 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                                                 + appointmentId));
 
                 return mapToResponse(prescription);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public byte[] downloadPrescriptionPdf(UUID id) {
+
+                PrescriptionEntity prescription = prescriptionRepository
+                                .findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Prescription not found"));
+
+                System.out.println(
+                                "ITEMS SIZE = " + prescription.getItems().size());
+
+                return pdfGeneratorService.generatePrescriptionPdf(prescription);
         }
 
 }
