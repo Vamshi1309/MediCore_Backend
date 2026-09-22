@@ -12,6 +12,7 @@ import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
+import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorProfileRepository doctorRepository;
+
+    private final UserRepository userRepository;
 
     // private final UserRepository userRepository;
 
@@ -43,6 +46,10 @@ public class DoctorServiceImpl implements DoctorService {
         DoctorProfileEntity doctor = doctorRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with that Id"));
 
+        if (request.getName() != null) {
+            user.setName(request.getName());
+        }
+
         if (request.getSpecialization() != null)
             doctor.setSpecialization(request.getSpecialization());
 
@@ -52,9 +59,18 @@ public class DoctorServiceImpl implements DoctorService {
         if (request.getExperienceInYears() != null)
             doctor.setExperienceInYears(request.getExperienceInYears());
 
+        if (request.getEmail() != null) {
+            user.setEmail(request.getEmail());
+        }
+
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber());
+        }
+
         if (request.getAvailabilityJson() != null)
             doctor.setAvailabilityJson(request.getAvailabilityJson());
 
+        userRepository.save(user);
         DoctorProfileEntity saved = doctorRepository.save(doctor);
 
         return mapToResponse(saved);

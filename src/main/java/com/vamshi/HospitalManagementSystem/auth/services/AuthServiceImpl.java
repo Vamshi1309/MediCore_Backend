@@ -199,7 +199,8 @@ public class AuthServiceImpl implements AuthService {
 
         @Override
         public UserProfileResponse getMe() {
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                // Authentication authentication =
+                // SecurityContextHolder.getContext().getAuthentication();
 
                 UserEntity user = authUtil.getLoggedInUser();
 
@@ -208,6 +209,7 @@ public class AuthServiceImpl implements AuthService {
                                 .name(user.getName())
                                 .phoneNumber(user.getPhoneNumber())
                                 .role(user.getRole().name())
+                                .staffId(user.getStaffId())
                                 .build();
         }
 
