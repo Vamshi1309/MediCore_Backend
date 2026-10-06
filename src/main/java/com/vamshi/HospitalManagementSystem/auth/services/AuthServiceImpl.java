@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -31,6 +30,7 @@ import com.vamshi.HospitalManagementSystem.auth.security.JwtUtil;
 import com.vamshi.HospitalManagementSystem.common.enums.Role;
 import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.exceptions.BadRequestException;
+import com.vamshi.HospitalManagementSystem.exceptions.InvalidRefreshTokenException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceAlreadyExistsException;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.exceptions.UnauthorizedRoleException;
@@ -115,31 +115,32 @@ public class AuthServiceImpl implements AuthService {
 
         @Override
         public RefreshTokenResponse refreshToken(RefreshTokenRequest request) {
+
                 String oldToken = request.getRefreshToken();
 
                 RefreshTokenEntity storedToken = refreshTokenRepository
                                 .findByToken(oldToken)
-                                .orElseThrow(() -> new ResourceNotFoundException(
+                                .orElseThrow(() -> new InvalidRefreshTokenException(
                                                 "Invalid refresh token"));
 
                 if (storedToken.isRevoked()) {
-                        throw new IllegalStateException(
-                                        "Refresh token already used. " +
-                                                        "Possible token theft detected. " +
-                                                        "Please login again.");
+                        throw new InvalidRefreshTokenException(
+                                        "Refresh token already used. Please login again.");
                 }
 
                 if (storedToken.getExpiryDate()
                                 .isBefore(LocalDateTime.now())) {
-                        throw new IllegalStateException(
+
+                        throw new InvalidRefreshTokenException(
                                         "Refresh token expired. Please login again.");
                 }
 
-                String tokenType = jwtUtil.extractClaim(oldToken,
+                String tokenType = jwtUtil.extractClaim(
+                                oldToken,
                                 claims -> claims.get("type", String.class));
 
                 if (!"REFRESH".equals(tokenType)) {
-                        throw new IllegalArgumentException(
+                        throw new InvalidRefreshTokenException(
                                         "Invalid token type. Refresh token required.");
                 }
 
@@ -151,8 +152,7 @@ public class AuthServiceImpl implements AuthService {
 
                 String newAccessToken = jwtUtil.generateAccessToken(userDetails);
 
-                String newRefreshToken = generateAndSaveRefreshToken(
-                                user, userDetails);
+                String newRefreshToken = generateAndSaveRefreshToken(user, userDetails);
 
                 return RefreshTokenResponse.builder()
                                 .accessToken(newAccessToken)

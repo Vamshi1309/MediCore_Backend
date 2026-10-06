@@ -45,6 +45,15 @@ public class GlobalExceptionHandler {
                                 .body(ApiResponse.error("Invalid email or password"));
         }
 
+        @ExceptionHandler(InvalidRefreshTokenException.class)
+        public ResponseEntity<ApiResponse<Void>> handleInvalidRefreshToken(
+                        InvalidRefreshTokenException ex) {
+
+                return ResponseEntity
+                                .status(HttpStatus.UNAUTHORIZED)
+                                .body(ApiResponse.error(ex.getMessage()));
+        }
+
         @ExceptionHandler(UsernameNotFoundException.class)
         public ResponseEntity<ApiResponse<?>> handleUsernameNotFound(
                         UsernameNotFoundException ex) {
