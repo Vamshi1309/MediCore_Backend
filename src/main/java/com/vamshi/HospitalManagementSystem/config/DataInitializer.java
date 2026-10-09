@@ -6,10 +6,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.vamshi.HospitalManagementSystem.common.enums.Role;
+import com.vamshi.HospitalManagementSystem.common.enums.Shifts;
 import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity;
 import com.vamshi.HospitalManagementSystem.patient.repositories.PatientProfileRepository;
+import com.vamshi.HospitalManagementSystem.receptionist.entities.ReceptionistProfile;
+import com.vamshi.HospitalManagementSystem.receptionist.repositories.ReceptionistProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
 import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
@@ -25,6 +28,7 @@ public class DataInitializer implements CommandLineRunner {
     private final DoctorProfileRepository doctorProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final PatientProfileRepository patientProfileRepository;
+    private final ReceptionistProfileRepository receptionistProfileRepository;
 
     @Value("${admin.phone}")
     private String adminPhone;
@@ -128,22 +132,28 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedReceptionists() {
-
         for (int i = 1; i <= 2; i++) {
 
-            saveIfNotExists(
+            final int receptionistNumber = i;
 
-                    UserEntity.builder()
-                            .name("Receptionist " + i)
-                            .staffId(String.format("REC-%04d", i))
-                            .phoneNumber(String.format("910000000%d", i))
-                            .email("receptionist" + i + "@hospital.com")
-                            .password(passwordEncoder.encode("reception123"))
-                            .role(Role.RECEPTIONIST)
-                            .isActive(true)
-                            .build()
-
-            );
+            String staffId = String.format("REC-%04d", receptionistNumber);
+            
+            UserEntity user = userRepository.findByStaffId(staffId).orElseGet(() -> {
+                UserEntity newUser = UserEntity.builder().name("Receptionist " + receptionistNumber).staffId(staffId)
+                        .phoneNumber(String.format("910000000%d", receptionistNumber))
+                        .email("receptionist" + receptionistNumber + "@hospital.com")
+                        .password(passwordEncoder.encode("reception123")).role(Role.RECEPTIONIST).isActive(true)
+                        .build();
+                UserEntity saved = userRepository.save(newUser);
+                log.info("Created RECEPTIONIST - {}", saved.getName());
+                return saved;
+            });
+            if (receptionistProfileRepository.findByUserId(user.getId()).isEmpty()) {
+                ReceptionistProfile profile = ReceptionistProfile.builder().user(user)
+                        .shift(receptionistNumber == 1 ? Shifts.MORNING : Shifts.AFTERNOON).build();
+                receptionistProfileRepository.save(profile);
+                log.info("Created receptionist profile for {}", staffId);
+            }
         }
     }
 

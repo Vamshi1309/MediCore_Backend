@@ -2,6 +2,8 @@ package com.vamshi.HospitalManagementSystem.receptionist.dtos;
 
 import java.util.UUID;
 
+import com.vamshi.HospitalManagementSystem.common.enums.Shifts;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,5 +20,5 @@ public class ReceptionistProfileResponse {
     private String name;
     private String email;
     private String phoneNumber;
-    private String shift;
+    private Shifts shift;
 }

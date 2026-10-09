@@ -60,7 +60,7 @@ public class ReceptionistServiceImpl implements ReceptionistService {
                                 .email(receptionist.getUser().getEmail())
                                 .phoneNumber(receptionist.getUser().getPhoneNumber())
                                 .shift(receptionist.getShift() != null
-                                                ? receptionist.getShift().name()
+                                                ? receptionist.getShift()
                                                 : null)
                                 .build();
         }
