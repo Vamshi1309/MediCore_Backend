@@ -1,5 +1,6 @@
 package com.vamshi.HospitalManagementSystem.user.repositories;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,4 +25,6 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByPhoneNumberAndRole(String phoneNumber, Role role);
 
     Optional<UserEntity> findByStaffIdAndRoleNot(String staffId, Role excludedRole);
+
+    List<UserEntity> findAllByRole(Role role);
 }

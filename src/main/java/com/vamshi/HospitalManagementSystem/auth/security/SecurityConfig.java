@@ -107,7 +107,6 @@ public class SecurityConfig {
                                                                 "/api/prescriptions/**")
                                                 .hasAnyRole("DOCTOR", "PATIENT", "PHARMACIST")
 
-                                                // Lab Reports
                                                 .requestMatchers(HttpMethod.POST,
                                                                 "/api/lab-reports")
                                                 .hasRole("RADIOLOGIST")
@@ -117,7 +116,7 @@ public class SecurityConfig {
                                                 .hasAnyRole("RADIOLOGIST", "DOCTOR",
                                                                 "PATIENT", "ADMIN")
                                                 .requestMatchers("/api/inventory/**")
-                                                .hasAnyRole("PHARMACIST", "ADMIN","DOCTOR")
+                                                .hasAnyRole("PHARMACIST", "ADMIN", "DOCTOR")
                                                 .requestMatchers(HttpMethod.POST,
                                                                 "/api/pharmacy/dispense")
                                                 .hasRole("PHARMACIST")
@@ -140,7 +139,7 @@ public class SecurityConfig {
                                                 .hasAnyRole("PATIENT", "RECEPTIONIST")
                                                 .requestMatchers("/api/doctor/**")
                                                 .hasRole("DOCTOR")
-                                                
+
                                                 .anyRequest().authenticated())
                                 .addFilterBefore(
                                                 jwtFilter,

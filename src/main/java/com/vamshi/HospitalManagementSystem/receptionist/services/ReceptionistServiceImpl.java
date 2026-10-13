@@ -1,5 +1,7 @@
 package com.vamshi.HospitalManagementSystem.receptionist.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
@@ -9,7 +11,11 @@ import com.vamshi.HospitalManagementSystem.receptionist.dtos.UpdateReceptionistP
 import com.vamshi.HospitalManagementSystem.receptionist.entities.ReceptionistProfile;
 import com.vamshi.HospitalManagementSystem.receptionist.repositories.ReceptionistProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
+import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
+import com.vamshi.HospitalManagementSystem.admin.dtos.UserSummaryResponse;
+import com.vamshi.HospitalManagementSystem.common.enums.Role;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -19,6 +25,8 @@ public class ReceptionistServiceImpl implements ReceptionistService {
         private final AuthUtil authUtil;
 
         private final ReceptionistProfileRepository receptionistRepository;
+
+        private final UserRepository userRepository;
 
         @Override
         public ReceptionistProfileResponse getMyProfile() {
@@ -32,6 +40,7 @@ public class ReceptionistServiceImpl implements ReceptionistService {
                 return mapToResponse(receptionist);
         }
 
+        @Transactional
         @Override
         public ReceptionistProfileResponse updateMyProfile(
                         UpdateReceptionistProfileRequest request) {
@@ -40,15 +49,21 @@ public class ReceptionistServiceImpl implements ReceptionistService {
 
                 ReceptionistProfile receptionist = receptionistRepository
                                 .findByUserId(user.getId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Receptionist not found"));
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Receptionist profile not found"));
 
-                if (request.getShift() != null) {
-                        receptionist.setShift(request.getShift());
-                }
+                if (request.getName() != null)
+                        user.setName(request.getName());
 
-                ReceptionistProfile saved = receptionistRepository.save(receptionist);
+                if (request.getEmail() != null)
+                        user.setEmail(request.getEmail());
 
-                return mapToResponse(saved);
+                if (request.getPhoneNumber() != null)
+                        user.setPhoneNumber(request.getPhoneNumber());
+
+                userRepository.save(user);
+
+                return mapToResponse(receptionist);
         }
 
         private ReceptionistProfileResponse mapToResponse(
@@ -64,4 +79,23 @@ public class ReceptionistServiceImpl implements ReceptionistService {
                                                 : null)
                                 .build();
         }
+
+        @Override
+        public List<UserSummaryResponse> getAllPatients() {
+                List<UserEntity> patients = userRepository.findAllByRole(Role.PATIENT);
+
+                return patients.stream()
+                                .map(user -> UserSummaryResponse.builder()
+                                                .userId(user.getId())
+                                                .name(user.getName())
+                                                .email(user.getEmail())
+                                                .phoneNumber(user.getPhoneNumber())
+                                                .staffId(user.getStaffId())
+                                                .role(user.getRole())
+                                                .isActive(user.getIsActive())
+                                                .createdAt(user.getCreatedAt())
+                                                .build())
+                                .toList();
+        }
+
 }
