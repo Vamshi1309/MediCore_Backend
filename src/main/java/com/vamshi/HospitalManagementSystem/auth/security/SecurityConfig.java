@@ -83,6 +83,9 @@ public class SecurityConfig {
                                                 .hasAnyRole("DOCTOR", "RECEPTIONIST")
 
                                                 // Prescriptions
+                                                .requestMatchers(HttpMethod.GET,
+                                                                "/api/prescriptions/all")
+                                                .hasAnyRole("PHARMACIST", "ADMIN")
                                                 .requestMatchers(HttpMethod.POST,
                                                                 "/api/prescriptions")
                                                 .hasRole("DOCTOR")

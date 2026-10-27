@@ -32,7 +32,6 @@ public class PrescriptionController {
 
         private final PrescriptionService prescriptionService;
 
-
         @PostMapping()
         public ResponseEntity<ApiResponse<PrescriptionResponse>> createPrescription(
                         @Valid @RequestBody CreatePrescriptionRequest request) {
@@ -109,6 +108,14 @@ public class PrescriptionController {
 
                 return ResponseEntity.ok(
                                 ApiResponse.success("Prescription fetched successfully", response));
+        }
+
+        @GetMapping("/all")
+        public ResponseEntity<ApiResponse<List<PrescriptionResponse>>> getAllPrescriptions() {
+                List<PrescriptionResponse> list = prescriptionService.getAllPrescriptions(null);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success("Prescriptions fetched successfully", list));
         }
 
 }

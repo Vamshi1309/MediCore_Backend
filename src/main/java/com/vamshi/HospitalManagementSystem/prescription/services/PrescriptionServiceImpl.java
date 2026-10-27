@@ -264,4 +264,14 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                 return pdfGeneratorService.generatePrescriptionPdf(prescription);
         }
 
+        @Override
+        @Transactional(readOnly = true)
+        public List<PrescriptionResponse> getAllPrescriptions(UUID patientId) {
+                List<PrescriptionEntity> prescriptions = prescriptionRepository.findAll();
+
+                return prescriptions.stream()
+                                .map(this::mapToResponse)
+                                .toList();
+        }
+
 }
