@@ -52,4 +52,7 @@ public class PrescriptionItemEntity {
             frequency = MedicineFrequency.MORNING_AFTERNOON;
         }
     }
+
+    @Column(nullable = false)
+    private Integer quantity;
 }

@@ -24,56 +24,56 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/pharmacy")
 @RequiredArgsConstructor
 public class PharmacyController {
-    private final PharmacyService pharmacyService;
+        private final PharmacyService pharmacyService;
 
-    @PostMapping()
-    public ResponseEntity<ApiResponse<DispenseResponse>> dispenseMedicine(
-            @Valid @RequestBody DispenseMedicineRequest request) {
-        DispenseResponse response = pharmacyService
-                .dispenseMedicine(request);
+        @PostMapping("/dispence")
+        public ResponseEntity<ApiResponse<DispenseResponse>> dispenseMedicine(
+                        @Valid @RequestBody DispenseMedicineRequest request) {
+                DispenseResponse response = pharmacyService
+                                .dispenseMedicine(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(
-                        "Medicine dispensed successfully",
-                        response));
-    }
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                .body(ApiResponse.success(
+                                                "Medicine dispensed successfully",
+                                                response));
+        }
 
-    @GetMapping("/history/patient/{patientId}")
-    public ResponseEntity<ApiResponse<List<DispenseResponse>>> getHistoryByPatient(
-            @PathVariable UUID patientId) {
+        @GetMapping("/history/patient/{patientId}")
+        public ResponseEntity<ApiResponse<List<DispenseResponse>>> getHistoryByPatient(
+                        @PathVariable UUID patientId) {
 
-        List<DispenseResponse> response = pharmacyService
-                .getDispenseHistoryByPatient(patientId);
+                List<DispenseResponse> response = pharmacyService
+                                .getDispenseHistoryByPatient(patientId);
 
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Dispense history fetched successfully",
-                        response));
-    }
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Dispense history fetched successfully",
+                                                response));
+        }
 
-    @GetMapping("/history/pharmacist/{pharmacistId}")
-    public ResponseEntity<ApiResponse<List<DispenseResponse>>> getHistoryByPharmacist(
-            @PathVariable UUID pharmacistId) {
+        @GetMapping("/history/pharmacist/{pharmacistId}")
+        public ResponseEntity<ApiResponse<List<DispenseResponse>>> getHistoryByPharmacist(
+                        @PathVariable UUID pharmacistId) {
 
-        List<DispenseResponse> response = pharmacyService
-                .getDispenseHistoryByPharmacist(pharmacistId);
+                List<DispenseResponse> response = pharmacyService
+                                .getDispenseHistoryByPharmacist(pharmacistId);
 
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Dispense history fetched successfully",
-                        response));
-    }
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Dispense history fetched successfully",
+                                                response));
+        }
 
-    @GetMapping("/history/prescription/{prescriptionId}")
-    public ResponseEntity<ApiResponse<List<DispenseResponse>>> getHistoryByPrescription(
-            @PathVariable UUID prescriptionId) {
+        @GetMapping("/history/prescription/{prescriptionId}")
+        public ResponseEntity<ApiResponse<List<DispenseResponse>>> getHistoryByPrescription(
+                        @PathVariable UUID prescriptionId) {
 
-        List<DispenseResponse> response = pharmacyService
-                .getDispenseHistoryByPrescription(prescriptionId);
+                List<DispenseResponse> response = pharmacyService
+                                .getDispenseHistoryByPrescription(prescriptionId);
 
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Dispense history fetched successfully",
-                        response));
-    }
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Dispense history fetched successfully",
+                                                response));
+        }
 }

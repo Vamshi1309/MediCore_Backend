@@ -70,6 +70,9 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                 .stream()
                                 .map(itemRequest -> {
 
+                                        int quantity = itemRequest.getDurationDays()
+                                                        * itemRequest.getFrequency().getDosesPerDay();
+
                                         MedicineEntity medicine = inventoryRepository
                                                         .findById(itemRequest.getMedicineId())
                                                         .orElseThrow(() -> new ResourceNotFoundException(
@@ -82,6 +85,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                                         .duration(itemRequest.getDurationDays())
                                                         .instructions(itemRequest.getInstructions())
                                                         .frequency(itemRequest.getFrequency())
+                                                        .quantity(quantity)
                                                         .prescription(prescription)
                                                         .build();
                                 })
@@ -95,7 +99,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         }
 
         @Override
-        public PrescriptionResponse getPrescriptionById(UUID id) {
+        public PrescriptionResponse getPrescriptionByPrescriptionId(UUID id) {
                 PrescriptionEntity prescription = prescriptionRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("No Prescription with that id"));
 
@@ -136,6 +140,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                 .doctorName(prescription.getDoctor().getName())
                                 .patientId(prescription.getPatient().getId())
                                 .patientName(prescription.getPatient().getName())
+                                .dispensingStatus(
+                                                prescription.getDispensingStatus().name())
                                 .doctorSpecialization(
                                                 doctorProfile != null
                                                                 ? doctorProfile.getSpecialization()
@@ -160,9 +166,11 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                                                 ? item.getMedicine().getMedicineName()
                                                                 : null)
                                 .dosage(item.getDosage())
+                                .pricePerUnit(item.getMedicine() != null ? item.getMedicine().getPrice() : null)
                                 .instructions(item.getInstructions())
                                 .durationInDays(item.getDuration())
                                 .frequency(item.getFrequency())
+                                .quantity(item.getQuantity())
                                 .build();
         }
 
@@ -211,6 +219,9 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                         .stream()
                                         .map(item -> {
 
+                                                int quantity = item.getDurationDays()
+                                                                * item.getFrequency().getDosesPerDay();
+
                                                 MedicineEntity medicine = inventoryRepository
                                                                 .findById(item.getMedicineId())
                                                                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -223,6 +234,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                                                 .duration(item.getDurationDays())
                                                                 .instructions(item.getInstructions())
                                                                 .frequency(item.getFrequency())
+                                                                .quantity(quantity)
                                                                 .prescription(prescription)
                                                                 .build();
                                         })

@@ -27,4 +27,6 @@ public class PrescriptionResponse {
     private List<PrescriptionItemResponse> items;
 
     private LocalDateTime createdAt;
+
+    private String dispensingStatus;
 }

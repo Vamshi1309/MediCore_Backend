@@ -15,8 +15,10 @@ public class PrescriptionItemResponse {
     private UUID itemId;
     private UUID medicineId;
     private String medicineName;
+    private Integer quantity;
     private String dosage;
     private Integer durationInDays;
+    private Double pricePerUnit;
     private MedicineFrequency frequency;
     private String instructions;
 }

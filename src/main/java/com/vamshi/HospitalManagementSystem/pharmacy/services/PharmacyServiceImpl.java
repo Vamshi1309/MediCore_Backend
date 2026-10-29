@@ -20,6 +20,7 @@ import com.vamshi.HospitalManagementSystem.pharmacy.dtos.DispenseMedicineRequest
 import com.vamshi.HospitalManagementSystem.pharmacy.dtos.DispenseResponse;
 import com.vamshi.HospitalManagementSystem.pharmacy.entities.DispenseEntity;
 import com.vamshi.HospitalManagementSystem.pharmacy.repositories.DispenseRepository;
+import com.vamshi.HospitalManagementSystem.prescription.dtos.enums.DispensingStatus;
 import com.vamshi.HospitalManagementSystem.prescription.entities.PrescriptionEntity;
 import com.vamshi.HospitalManagementSystem.prescription.repositories.PrescriptionRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
@@ -83,6 +84,9 @@ public class PharmacyServiceImpl implements PharmacyService {
                 }
 
                 List<DispenseEntity> savedList = dispenseRepository.saveAll(dispenseList);
+                prescription.setDispensingStatus(
+                                DispensingStatus.COMPLETED);
+                prescriptionRepository.save(prescription);
 
                 List<DispenseItemResponse> itemResponses = savedList
                                 .stream()

@@ -43,10 +43,13 @@ public class PrescriptionController {
 
         @GetMapping("/{id}")
         @Transactional
-        public ResponseEntity<ApiResponse<PrescriptionResponse>> getPrescriptionById(@PathVariable UUID id) {
-                PrescriptionResponse response = prescriptionService.getPrescriptionById(id);
+        public ResponseEntity<ApiResponse<PrescriptionResponse>> getPrescriptionByPrescriptionId(
+                        @PathVariable("id") UUID prescriptionId) {
 
-                return ResponseEntity.ok(ApiResponse.success("Fetched Prescription by id Successfully", response));
+                PrescriptionResponse response = prescriptionService.getPrescriptionByPrescriptionId(prescriptionId);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success("Fetched Prescription by id Successfully", response));
         }
 
         @GetMapping("/patient/{patientId}")

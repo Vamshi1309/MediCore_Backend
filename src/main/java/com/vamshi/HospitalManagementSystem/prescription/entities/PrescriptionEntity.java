@@ -7,10 +7,13 @@ import java.util.UUID;
 
 import com.vamshi.HospitalManagementSystem.appointment.entities.AppointmentEntity;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
+import com.vamshi.HospitalManagementSystem.prescription.dtos.enums.DispensingStatus;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,7 +42,7 @@ public class PrescriptionEntity {
     private UUID id;
 
     @OneToOne
-    @JoinColumn(name = "appointment_id", nullable = false,unique = true)
+    @JoinColumn(name = "appointment_id", nullable = false, unique = true)
     private AppointmentEntity appointment;
 
     @ManyToOne
@@ -57,11 +60,16 @@ public class PrescriptionEntity {
     private LocalDateTime createdAt;
 
     @Builder.Default
-    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PrescriptionItemEntity> items = new ArrayList<>();
 
     @PrePersist
     private void setCreatedAt() {
         this.createdAt = LocalDateTime.now();
     }
+
+    // PrescriptionEntity.java
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private DispensingStatus dispensingStatus = DispensingStatus.PENDING;
 }

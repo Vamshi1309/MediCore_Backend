@@ -11,7 +11,7 @@ import com.vamshi.HospitalManagementSystem.prescription.entities.PrescriptionEnt
 public interface PrescriptionService {
     PrescriptionResponse createPrescription(CreatePrescriptionRequest request);
 
-    PrescriptionResponse getPrescriptionById(UUID id);
+    PrescriptionResponse getPrescriptionByPrescriptionId(UUID id);
 
     List<PrescriptionResponse> getPrescriptionsByDoctor(UUID doctorId);
 
