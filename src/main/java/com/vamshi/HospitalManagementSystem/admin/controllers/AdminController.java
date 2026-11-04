@@ -3,10 +3,10 @@ package com.vamshi.HospitalManagementSystem.admin.controllers;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vamshi.HospitalManagementSystem.admin.dtos.AssignRoleRequest;
-import com.vamshi.HospitalManagementSystem.admin.dtos.CreateUserRequest;
+import com.vamshi.HospitalManagementSystem.admin.dtos.AdminStatsResponse;
+import com.vamshi.HospitalManagementSystem.admin.dtos.CreateStaffRequest;
+import com.vamshi.HospitalManagementSystem.admin.dtos.StaffSummaryResponse;
 import com.vamshi.HospitalManagementSystem.admin.dtos.UpdateUserStatusRequest;
-import com.vamshi.HospitalManagementSystem.admin.dtos.UserSummaryResponse;
 import com.vamshi.HospitalManagementSystem.admin.services.AdminService;
 import com.vamshi.HospitalManagementSystem.common.ApiResponse;
 
@@ -31,45 +31,38 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    @PostMapping("/users")
-    public ResponseEntity<ApiResponse<UserSummaryResponse>> createUser(
-            @RequestBody @Valid CreateUserRequest request) {
-        UserSummaryResponse response = adminService.createUser(request);
-
+    @PostMapping("/staff")
+    public ResponseEntity<ApiResponse<StaffSummaryResponse>> createStaff(
+            @RequestBody @Valid CreateStaffRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("User Created Successfully ", response));
+                .body(ApiResponse.success("Staff created successfully",
+                        adminService.createStaff(request)));
     }
 
-    @GetMapping("/users")
-    public ResponseEntity<ApiResponse<List<UserSummaryResponse>>> getAllUsers() {
-
-        List<UserSummaryResponse> users = adminService.getAllUsers();
-
-        return ResponseEntity.ok(ApiResponse.success("Users Fetched Successfully", users));
+    @GetMapping("/staff")
+    public ResponseEntity<ApiResponse<List<StaffSummaryResponse>>> getAllStaff() {
+        return ResponseEntity.ok(ApiResponse.success("Staff fetched successfully",
+                adminService.getAllStaff()));
     }
 
-    @GetMapping("/users/{id}")
-    public ResponseEntity<ApiResponse<UserSummaryResponse>> getUserById(@PathVariable UUID id) {
-        UserSummaryResponse user = adminService.getUserById(id);
-
-        return ResponseEntity.ok(ApiResponse.success("User Fetched successfully with Id:" + id, user));
+    @GetMapping("/staff/{id}")
+    public ResponseEntity<ApiResponse<StaffSummaryResponse>> getStaffById(
+            @PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Staff fetched successfully",
+                adminService.getStaffById(id)));
     }
 
-    @PatchMapping("/users/{id}/role")
-    public ResponseEntity<ApiResponse<UserSummaryResponse>> assignRole(@PathVariable UUID id,
-            @RequestBody @Valid AssignRoleRequest role) {
-        UserSummaryResponse response = adminService.assignRole(id, role);
-        return ResponseEntity.ok(
-                ApiResponse.success("Role updated successfully", response));
-    }
-
-    @PatchMapping("/users/{id}/status")
-    public ResponseEntity<ApiResponse<UserSummaryResponse>> updateStatus(
+    @PatchMapping("/staff/{id}/status")
+    public ResponseEntity<ApiResponse<StaffSummaryResponse>> updateStatus(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateUserStatusRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Status updated successfully",
+                adminService.updateStaffStatus(id, request)));
+    }
 
-        UserSummaryResponse response = adminService.updateStatus(id, request);
-        return ResponseEntity.ok(
-                ApiResponse.success("Status updated successfully", response));
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<AdminStatsResponse>> getStats() {
+        return ResponseEntity.ok(ApiResponse.success("Stats fetched successfully",
+                adminService.getStats()));
     }
 }

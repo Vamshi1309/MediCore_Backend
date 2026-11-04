@@ -1,5 +1,6 @@
 package com.vamshi.HospitalManagementSystem.appointment.repositories;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,4 +20,6 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     List<AppointmentEntity> findByDoctorIdAndStatus(UUID doctorId, AppointmentStatus status);
 
     List<AppointmentEntity> findByPatientIdAndDoctorId(UUID patientId, UUID doctorId);
+
+    long countByScheduledAtBetween(LocalDateTime start, LocalDateTime end);
 }

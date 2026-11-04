@@ -11,10 +11,12 @@ import com.vamshi.HospitalManagementSystem.doctor.entities.DoctorProfileEntity;
 import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepository;
 import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity;
 import com.vamshi.HospitalManagementSystem.patient.repositories.PatientProfileRepository;
+import com.vamshi.HospitalManagementSystem.pharmacist.repositories.PharmacistProfileRepository;
 import com.vamshi.HospitalManagementSystem.receptionist.entities.ReceptionistProfile;
 import com.vamshi.HospitalManagementSystem.receptionist.repositories.ReceptionistProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
 import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
+import com.vamshi.HospitalManagementSystem.pharmacist.entities.PharmacistProfileEntity;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final PatientProfileRepository patientProfileRepository;
     private final ReceptionistProfileRepository receptionistProfileRepository;
+    private final PharmacistProfileRepository pharmacistProfileRepository;
 
     @Value("${admin.phone}")
     private String adminPhone;
@@ -137,7 +140,7 @@ public class DataInitializer implements CommandLineRunner {
             final int receptionistNumber = i;
 
             String staffId = String.format("REC-%04d", receptionistNumber);
-            
+
             UserEntity user = userRepository.findByStaffId(staffId).orElseGet(() -> {
                 UserEntity newUser = UserEntity.builder().name("Receptionist " + receptionistNumber).staffId(staffId)
                         .phoneNumber(String.format("910000000%d", receptionistNumber))
@@ -161,19 +164,40 @@ public class DataInitializer implements CommandLineRunner {
 
         for (int i = 1; i <= 2; i++) {
 
-            saveIfNotExists(
+            final int pharmacistNumber = i;
 
-                    UserEntity.builder()
-                            .name("Pharmacist " + i)
-                            .staffId(String.format("PHA-%04d", i))
-                            .phoneNumber(String.format("920000000%d", i))
-                            .email("pharmacist" + i + "@hospital.com")
-                            .password(passwordEncoder.encode("pharmacy123"))
-                            .role(Role.PHARMACIST)
-                            .isActive(true)
-                            .build()
+            String staffId = String.format("PHA-%04d", pharmacistNumber);
 
-            );
+            UserEntity user = userRepository.findByStaffId(staffId).orElseGet(() -> {
+
+                UserEntity newUser = UserEntity.builder()
+                        .name("Pharmacist " + pharmacistNumber)
+                        .staffId(staffId)
+                        .phoneNumber(String.format("920000000%d", pharmacistNumber))
+                        .email("pharmacist" + pharmacistNumber + "@hospital.com")
+                        .password(passwordEncoder.encode("pharmacy123"))
+                        .role(Role.PHARMACIST)
+                        .isActive(true)
+                        .build();
+
+                UserEntity saved = userRepository.save(newUser);
+
+                log.info("Created PHARMACIST - {}", saved.getName());
+
+                return saved;
+            });
+
+            if (pharmacistProfileRepository.findByUserId(user.getId()).isEmpty()) {
+
+                PharmacistProfileEntity profile = PharmacistProfileEntity.builder()
+                        .user(user)
+                        .licenseNumber("PH-LIC-" + String.format("%04d", pharmacistNumber))
+                        .build();
+
+                pharmacistProfileRepository.save(profile);
+
+                log.info("Created pharmacist profile for {}", staffId);
+            }
         }
     }
 

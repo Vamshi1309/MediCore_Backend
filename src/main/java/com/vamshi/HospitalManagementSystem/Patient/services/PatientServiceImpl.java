@@ -1,8 +1,11 @@
 package com.vamshi.HospitalManagementSystem.patient.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vamshi.HospitalManagementSystem.common.enums.Role;
 import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.patient.dtos.PatientProfileResponse;
@@ -11,6 +14,7 @@ import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity
 import com.vamshi.HospitalManagementSystem.patient.repositories.PatientProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
 import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
+import com.vamshi.HospitalManagementSystem.patient.dtos.PatientSummaryResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -74,6 +78,21 @@ public class PatientServiceImpl implements PatientService {
                 .save(patient);
 
         return mapToResponse(saved);
+    }
+
+    @Override
+    public List<PatientSummaryResponse> getAllPatients() {
+        return userRepository.findByRole(Role.PATIENT)
+                .stream()
+                .map(u -> PatientSummaryResponse.builder()
+                        .userId(u.getId())
+                        .name(u.getName())
+                        .phoneNumber(u.getPhoneNumber())
+                        .email(u.getEmail())
+                        .isActive(u.getIsActive())
+                        .createdAt(u.getCreatedAt())
+                        .build())
+                .toList();
     }
 
     private PatientProfileResponse mapToResponse(

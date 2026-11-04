@@ -92,6 +92,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MedicineResponse> getLowStockMedicines(Integer threshold) {
         return inventoryRepository
                 .findByQuantityLessThan(threshold)

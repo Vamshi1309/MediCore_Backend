@@ -12,7 +12,7 @@ import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByPhoneNumber(String phoneNumber);
 
-    Optional<UserEntity> findByStaffId(String staffId); 
+    Optional<UserEntity> findByStaffId(String staffId);
 
     boolean existsByPhoneNumber(String phoneNumber);
 
@@ -27,4 +27,10 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByStaffIdAndRoleNot(String staffId, Role excludedRole);
 
     List<UserEntity> findAllByRole(Role role);
+
+    List<UserEntity> findByRoleIn(List<Role> roles);
+
+    List<UserEntity> findByRole(Role role); // patients list
+
+    long countByRole(Role role);
 }

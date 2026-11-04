@@ -12,7 +12,8 @@ import com.vamshi.HospitalManagementSystem.common.ApiResponse;
 import com.vamshi.HospitalManagementSystem.receptionist.dtos.ReceptionistProfileResponse;
 import com.vamshi.HospitalManagementSystem.receptionist.dtos.UpdateReceptionistProfileRequest;
 import com.vamshi.HospitalManagementSystem.receptionist.services.ReceptionistService;
-import com.vamshi.HospitalManagementSystem.admin.dtos.UserSummaryResponse;
+import com.vamshi.HospitalManagementSystem.patient.dtos.PatientSummaryResponse;
+import com.vamshi.HospitalManagementSystem.patient.services.PatientService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class ReceptionistController {
 
         private final ReceptionistService receptionistService;
+        private final PatientService patientService;
 
         @GetMapping("/profile")
         public ResponseEntity<ApiResponse<ReceptionistProfileResponse>> getMyProfile() {
@@ -48,9 +50,9 @@ public class ReceptionistController {
         }
 
         @GetMapping("/patients")
-        public ResponseEntity<ApiResponse<java.util.List<UserSummaryResponse>>> getAllPatients() {
+        public ResponseEntity<ApiResponse<java.util.List<PatientSummaryResponse>>> getAllPatients() {
 
-                java.util.List<UserSummaryResponse> patients = receptionistService.getAllPatients();
+                java.util.List<PatientSummaryResponse> patients = patientService.getAllPatients();
 
                 return ResponseEntity.ok(
                                 ApiResponse.success("Patients fetched successfully", patients));

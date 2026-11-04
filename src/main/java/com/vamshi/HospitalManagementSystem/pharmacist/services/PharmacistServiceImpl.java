@@ -9,6 +9,7 @@ import com.vamshi.HospitalManagementSystem.pharmacist.dtos.UpdatePharmacistProfi
 import com.vamshi.HospitalManagementSystem.pharmacist.entities.PharmacistProfileEntity;
 import com.vamshi.HospitalManagementSystem.pharmacist.repositories.PharmacistProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
+import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class PharmacistServiceImpl implements PharmacistService {
 
     private final PharmacistProfileRepository pharmacistRepository;
+    private final UserRepository userRepository;
     private final AuthUtil authUtil;
 
     @Override
@@ -26,8 +28,7 @@ public class PharmacistServiceImpl implements PharmacistService {
 
         PharmacistProfileEntity pharmacist = pharmacistRepository
                 .findByUserId(user.getId())
-                .orElseThrow(() ->
-                    new ResourceNotFoundException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Pharmacist profile not found"));
 
         return mapToResponse(pharmacist);
@@ -41,14 +42,24 @@ public class PharmacistServiceImpl implements PharmacistService {
 
         PharmacistProfileEntity pharmacist = pharmacistRepository
                 .findByUserId(user.getId())
-                .orElseThrow(() ->
-                    new ResourceNotFoundException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Pharmacist profile not found"));
 
         if (request.getLicenseNumber() != null)
             pharmacist.setLicenseNumber(
-                request.getLicenseNumber());
+                    request.getLicenseNumber());
 
+        if (request.getName() != null)
+            user.setName(request.getName());
+
+        if (request.getEmail() != null)
+            user.setEmail(request.getEmail());
+
+        if (request.getPhoneNumber() != null)
+            user.setPhoneNumber(request.getPhoneNumber());
+
+        userRepository.save(user);
+        
         PharmacistProfileEntity saved = pharmacistRepository
                 .save(pharmacist);
 

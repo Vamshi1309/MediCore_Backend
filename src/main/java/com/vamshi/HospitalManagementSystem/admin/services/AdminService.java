@@ -3,19 +3,19 @@ package com.vamshi.HospitalManagementSystem.admin.services;
 import java.util.List;
 import java.util.UUID;
 
-import com.vamshi.HospitalManagementSystem.admin.dtos.AssignRoleRequest;
-import com.vamshi.HospitalManagementSystem.admin.dtos.CreateUserRequest;
+import com.vamshi.HospitalManagementSystem.admin.dtos.AdminStatsResponse;
+import com.vamshi.HospitalManagementSystem.admin.dtos.CreateStaffRequest;
+import com.vamshi.HospitalManagementSystem.admin.dtos.StaffSummaryResponse;
 import com.vamshi.HospitalManagementSystem.admin.dtos.UpdateUserStatusRequest;
-import com.vamshi.HospitalManagementSystem.admin.dtos.UserSummaryResponse;
 
 public interface AdminService {
-    UserSummaryResponse createUser(CreateUserRequest request);
+    StaffSummaryResponse createStaff(CreateStaffRequest request);
 
-    List<UserSummaryResponse> getAllUsers();
+    List<StaffSummaryResponse> getAllStaff();
 
-    UserSummaryResponse getUserById(UUID id);
+    StaffSummaryResponse getStaffById(UUID id);
 
-    UserSummaryResponse updateStatus(UUID id, UpdateUserStatusRequest request);
+    StaffSummaryResponse updateStaffStatus(UUID id, UpdateUserStatusRequest request);
 
-    UserSummaryResponse assignRole(UUID id, AssignRoleRequest request);
+    AdminStatsResponse getStats();
 }

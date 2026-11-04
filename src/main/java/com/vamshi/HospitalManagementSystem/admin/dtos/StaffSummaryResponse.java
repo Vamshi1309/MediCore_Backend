@@ -3,32 +3,22 @@ package com.vamshi.HospitalManagementSystem.admin.dtos;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.vamshi.HospitalManagementSystem.common.enums.Role;
-
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
 @Builder
-public class UserSummaryResponse {
-
+@AllArgsConstructor
+@NoArgsConstructor
+public class StaffSummaryResponse {
     private UUID userId;
-
     private String name;
-
-    private String email;
-
-    private String phoneNumber;
-
     private String staffId;
-
-    private Role role;
-
+    private String email;
+    private String phoneNumber;
+    private String role;
     private Boolean isActive;
-
     private LocalDateTime createdAt;
-
-    private String tempPassword;
 }
