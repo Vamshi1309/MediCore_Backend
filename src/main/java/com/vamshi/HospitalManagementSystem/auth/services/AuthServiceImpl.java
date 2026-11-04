@@ -74,6 +74,10 @@ public class AuthServiceImpl implements AuthService {
                 UserEntity user = userRepository.findByPhoneNumber(
                                 request.getPhoneNumber())
                                 .orElseThrow(() -> new ResourceNotFoundException("User not exist"));
+
+                if (!Boolean.TRUE.equals(user.getIsActive())) {
+                        throw new UnauthorizedRoleException("Account is deactivated");
+                }
                 if (user.getRole() != Role.PATIENT) {
                         throw new UnauthorizedRoleException(
                                         "Please use staff login");
@@ -91,6 +95,9 @@ public class AuthServiceImpl implements AuthService {
                                 request.getStaffId(), Role.PATIENT)
                                 .orElseThrow(() -> new ResourceNotFoundException("User not exist"));
 
+                if (!Boolean.TRUE.equals(user.getIsActive())) {
+                        throw new UnauthorizedRoleException("Account is deactivated");
+                }
                 System.out.println("========DEBUG===========");
                 System.out.println("USER :- " + user);
                 System.out.println("========DEBUG===========");
