@@ -131,7 +131,7 @@ public class SecurityConfig {
                                                 .hasRole("PHARMACIST")
 
                                                 .requestMatchers("/api/patient/**")
-                                                .hasRole("PATIENT")
+                                                .hasAnyRole("PATIENT", "ADMIN", "RECEPTIONIST")
 
                                                 .requestMatchers(HttpMethod.GET,
                                                                 "/api/pharmacy/history/**")

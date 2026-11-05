@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vamshi.HospitalManagementSystem.admin.dtos.PatientSummaryResponse;
 import com.vamshi.HospitalManagementSystem.common.ApiResponse;
 import com.vamshi.HospitalManagementSystem.patient.dtos.PatientProfileResponse;
 import com.vamshi.HospitalManagementSystem.patient.dtos.UpdatePatientProfileRequest;
