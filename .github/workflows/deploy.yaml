@@ -58,10 +58,12 @@ jobs:
             --arg region "$AWS_REGION" \
             --arg registry "$ECR_REGISTRY" \
             --arg directory "/opt/medicore" \
+            --arg image_tag "$GITHUB_SHA" \
             '[
               "set -e",
               ("aws ecr get-login-password --region " + $region + " | docker login --username AWS --password-stdin " + $registry),
               ("cd " + $directory),
+              ("export IMAGE_TAG=" + $image_tag),
               "docker compose pull",
               "docker compose up -d --remove-orphans",
               "docker image prune -f"
