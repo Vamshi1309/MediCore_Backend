@@ -1,77 +1,111 @@
-name: Build and Deploy
+
+name: Build and Deploy MediCore
 
 on:
   push:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: medicore-production-deploy
+  cancel-in-progress: false
+
 env:
-  ECR_REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
+  AWS_REGION: ap-south-2
+  AWS_ACCOUNT_ID: "015312415641"
+  ECR_REGISTRY: 015312415641.dkr.ecr.ap-south-2.amazonaws.com
+  ECR_REPOSITORY: medicore-backend
+  EC2_INSTANCE_ID: i-09e3ce9e85e65c6a7
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
+      - name: Configure AWS Credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: arn:aws:iam::015312415641:role/MediCoreGitHubDeployRole
+          aws-region: ap-south-2
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker Image
         run: |
-          docker build -t $ECR_REPO:latest .
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
 
-      - name: Push Docker Image
+      - name: Push Docker Image to ECR
         run: |
-          docker push $ECR_REPO:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
+      - name: Deploy to EC2 using SSM
+        shell: bash
+        run: |
+          set -euo pipefail
 
-    steps:
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /home/ubuntu/hospital-management
+          COMMANDS=$(jq -n \
+            --arg region "$AWS_REGION" \
+            --arg registry "$ECR_REGISTRY" \
+            --arg directory "/opt/medicore" \
+            '[
+              "set -e",
+              ("aws ecr get-login-password --region " + $region + " | docker login --username AWS --password-stdin " + $registry),
+              ("cd " + $directory),
+              "docker compose pull",
+              "docker compose up -d --remove-orphans",
+              "docker image prune -f"
+            ]')
 
-            cat > .env <<EOF
-            ECR_REPO=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
-            DB_URL=${{ secrets.DB_URL }}
-            DB_USERNAME=${{ secrets.DB_USERNAME }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            JWT_ACCESS_EXPIRATION=900000
-            JWT_REFRESH_EXPIRATION=604800000
-            ADMIN_PHONE=${{ secrets.ADMIN_PHONE }}
-            ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
-            REDIS_HOST=redis
-            REDIS_PORT=6379
-            AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }}
-            AWS_S3_REGION=${{ secrets.AWS_REGION }}
-            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            EOF
+          PARAMETERS=$(jq -n --argjson commands "$COMMANDS" \
+            '{commands: $commands}')
 
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$EC2_INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy MediCore backend from GitHub Actions" \
+            --parameters "$PARAMETERS" \
+            --query "Command.CommandId" \
+            --output text)
 
-            docker compose down
+          echo "SSM Command ID: $COMMAND_ID"
 
-            docker compose pull
+          for attempt in {1..60}; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "Status" \
+              --output text 2>/dev/null || true)
 
-            docker compose up -d
+            echo "Deployment status: $STATUS"
 
-            docker image prune -f
+            case "$STATUS" in
+              Success)
+                echo "MediCore deployment successful!"
+                exit 0
+                ;;
+              Failed|Cancelled|TimedOut|Cancelling)
+                aws ssm get-command-invocation \
+                  --command-id "$COMMAND_ID" \
+                  --instance-id "$EC2_INSTANCE_ID" \
+                  --query "StandardErrorContent" \
+                  --output text || true
+                exit 1
+                ;;
+            esac
+
+            sleep 5
+          done
+
+          echo "Deployment timed out. Check AWS Systems Manager command history."
+          exit 1
