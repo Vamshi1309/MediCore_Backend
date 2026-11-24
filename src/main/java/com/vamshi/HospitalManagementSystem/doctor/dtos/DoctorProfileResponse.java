@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DoctorProfileResponse {
-
     private UUID userId;
     private String name;
     private String email;

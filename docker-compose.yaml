@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ghcr.io/vamshi1309/hospitalmanagementsystem-backend:latest
+    image: 015312415641.dkr.ecr.ap-south-2.amazonaws.com/medicore-backend:latest
     container_name: hosptial-backend
 
     ports:
