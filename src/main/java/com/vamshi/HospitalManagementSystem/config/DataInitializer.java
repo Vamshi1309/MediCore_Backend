@@ -12,6 +12,7 @@ import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepo
 import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity;
 import com.vamshi.HospitalManagementSystem.patient.repositories.PatientProfileRepository;
 import com.vamshi.HospitalManagementSystem.pharmacist.repositories.PharmacistProfileRepository;
+import com.vamshi.HospitalManagementSystem.radiologist.entities.RadiologistEntity;
 import com.vamshi.HospitalManagementSystem.radiologist.repositories.RadiologistProfileRepository;
 import com.vamshi.HospitalManagementSystem.receptionist.entities.ReceptionistProfile;
 import com.vamshi.HospitalManagementSystem.receptionist.repositories.ReceptionistProfileRepository;
@@ -235,11 +236,10 @@ public class DataInitializer implements CommandLineRunner {
             // Create profile if it doesn't already exist
             if (radiologistProfileRepository.findByUserId(user.getId()).isEmpty()) {
 
-                RadiologistProfileEntity radiologistProfile = RadiologistProfileEntity.builder()
+                RadiologistEntity radiologistProfile = RadiologistEntity.builder()
                         .user(user)
-                        .specialization("Radiology")
-                        .qualification("MBBS")
-                        .experienceInYears(radiologistNumber * 2)
+                        .labSection("Radiology")
+                        .certification("Radiology Certification")
                         .build();
 
                 radiologistProfileRepository.save(radiologistProfile);
