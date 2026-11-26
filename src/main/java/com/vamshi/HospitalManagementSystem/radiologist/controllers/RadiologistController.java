@@ -16,20 +16,20 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/radiologist")
+@RequestMapping("/api/radiologist/profile")
 @RequiredArgsConstructor
 public class RadiologistController {
 
     private final RadiologistService radiologistService;
 
-    @GetMapping("/profile")
+    @GetMapping
     public ResponseEntity<ApiResponse<RadiologistProfileResponse>> getProfile() {
         RadiologistProfileResponse response = radiologistService.getMyProfile();
 
         return ResponseEntity.ok(ApiResponse.success("Profile fetched successfully", response));
     }
 
-    @PutMapping("/profile")
+    @PutMapping
     public ResponseEntity<ApiResponse<RadiologistProfileResponse>> updateMyProfile(
             @Valid @RequestBody UpdateRadiologistProfileRequest request) {
         RadiologistProfileResponse response = radiologistService.updateMyProfile(request);

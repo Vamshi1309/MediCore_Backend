@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.vamshi.HospitalManagementSystem.appointment.entities.AppointmentEntity;
 import com.vamshi.HospitalManagementSystem.appointment.repositories.AppointmentRepository;
+import com.vamshi.HospitalManagementSystem.common.enums.AppointmentStatus;
 import com.vamshi.HospitalManagementSystem.common.utils.AuthUtil;
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.labreport.dtos.CreateLabReportRequest;
@@ -34,6 +35,11 @@ public class LabReportServiceImpl implements LabReportService {
 
                 AppointmentEntity appointment = appointmentRepository.findById(request.getAppointmentId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+
+                if (appointment.getStatus() != AppointmentStatus.CONFIRMED) {
+                        throw new IllegalStateException(
+                                        "Appointment must be CONFIRMED before uploading a lab report");
+                }
 
                 String fileKey = s3Service.uploadFile(file);
 

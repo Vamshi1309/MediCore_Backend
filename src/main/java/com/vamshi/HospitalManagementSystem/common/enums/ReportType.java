@@ -5,5 +5,6 @@ public enum ReportType {
     MRI,
     CT_SCAN,
     BLOOD_TEST,
-    URINE_TEST
+    URINE_TEST,
+    ULTRASOUND
 }
