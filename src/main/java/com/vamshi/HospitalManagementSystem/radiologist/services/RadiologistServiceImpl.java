@@ -7,6 +7,7 @@ import com.vamshi.HospitalManagementSystem.radiologist.dtos.UpdateRadiologistPro
 import com.vamshi.HospitalManagementSystem.radiologist.entities.RadiologistEntity;
 import com.vamshi.HospitalManagementSystem.radiologist.repositories.RadiologistProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
+import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 public class RadiologistServiceImpl implements RadiologistService {
 
     private final RadiologistProfileRepository radiologistRepository;
+
+    private final UserRepository userRepository;
 
     private final AuthUtil authUtil;
 
@@ -35,6 +38,14 @@ public class RadiologistServiceImpl implements RadiologistService {
         RadiologistEntity radiologist = radiologistRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Radiologist not found with that Id"));
 
+        if (request.getName() != null) {
+            user.setName(request.getName());
+        }
+
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber());
+        }
+
         if (request.getCertification() != null) {
             radiologist.setCertification(request.getCertification());
         }
@@ -43,6 +54,7 @@ public class RadiologistServiceImpl implements RadiologistService {
             radiologist.setLabSection(request.getLabSection());
         }
 
+        userRepository.save(user);
         RadiologistEntity saved = radiologistRepository.save(radiologist);
 
         return mapToResponse(saved);

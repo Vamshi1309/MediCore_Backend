@@ -7,6 +7,10 @@ import lombok.Setter;
 @Setter
 public class UpdateRadiologistProfileRequest {
 
+    private String name;
+
+    private String phoneNumber;
+
     private String labSection;
 
     private String certification;
