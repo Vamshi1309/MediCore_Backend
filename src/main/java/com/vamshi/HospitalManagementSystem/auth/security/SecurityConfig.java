@@ -68,7 +68,7 @@ public class SecurityConfig {
 
                                                 .requestMatchers(HttpMethod.GET,
                                                                 "/api/appointments")
-                                                .hasAnyRole("RECEPTIONIST", "ADMIN")
+                                                .hasAnyRole("RECEPTIONIST", "ADMIN", "RADIOLOGIST")
 
                                                 .requestMatchers(HttpMethod.GET,
                                                                 "/api/appointments/doctor/**")

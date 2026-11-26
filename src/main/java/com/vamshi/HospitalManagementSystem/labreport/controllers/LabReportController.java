@@ -44,6 +44,13 @@ public class LabReportController {
                 .body(ApiResponse.success("Lab report created successfully", response));
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<LabReportResponse>>> getMyReports() {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Reports fetched successfully",
+                labReportService.getMyLabReports()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<LabReportResponse>> getLabReportById(@PathVariable UUID id) {
         LabReportResponse response = labReportService.getLabReportById(id);

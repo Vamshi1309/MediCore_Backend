@@ -19,4 +19,6 @@ public interface LabReportService {
     List<LabReportResponse> getLabReportByAppointmentId(UUID appointmentId);
 
     String getDownloadUrl(UUID reportId);
+
+    List<LabReportResponse> getMyLabReports();
 }

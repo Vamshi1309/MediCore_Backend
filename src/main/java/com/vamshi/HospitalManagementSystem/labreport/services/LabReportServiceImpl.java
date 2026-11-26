@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.vamshi.HospitalManagementSystem.appointment.entities.AppointmentEntity;
@@ -73,6 +74,17 @@ public class LabReportServiceImpl implements LabReportService {
                 List<LabReportEntity> labReports = labReportRepository.findByAppointmentId(appointmentId);
 
                 return labReports
+                                .stream()
+                                .map(this::mapToResponse)
+                                .toList();
+        }
+
+        @Override
+        @Transactional
+        public List<LabReportResponse> getMyLabReports() {
+                UserEntity radiologist = authUtil.getLoggedInUser();
+                return labReportRepository
+                                .findByRadiologistId(radiologist.getId())
                                 .stream()
                                 .map(this::mapToResponse)
                                 .toList();
