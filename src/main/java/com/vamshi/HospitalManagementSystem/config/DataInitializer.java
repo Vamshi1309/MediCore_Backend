@@ -12,6 +12,7 @@ import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepo
 import com.vamshi.HospitalManagementSystem.patient.entities.PatientProfileEntity;
 import com.vamshi.HospitalManagementSystem.patient.repositories.PatientProfileRepository;
 import com.vamshi.HospitalManagementSystem.pharmacist.repositories.PharmacistProfileRepository;
+import com.vamshi.HospitalManagementSystem.radiologist.repositories.RadiologistProfileRepository;
 import com.vamshi.HospitalManagementSystem.receptionist.entities.ReceptionistProfile;
 import com.vamshi.HospitalManagementSystem.receptionist.repositories.ReceptionistProfileRepository;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
@@ -32,6 +33,7 @@ public class DataInitializer implements CommandLineRunner {
     private final PatientProfileRepository patientProfileRepository;
     private final ReceptionistProfileRepository receptionistProfileRepository;
     private final PharmacistProfileRepository pharmacistProfileRepository;
+    private final RadiologistProfileRepository radiologistProfileRepository;
 
     @Value("${admin.phone}")
     private String adminPhone;
@@ -205,19 +207,45 @@ public class DataInitializer implements CommandLineRunner {
 
         for (int i = 1; i <= 2; i++) {
 
-            saveIfNotExists(
+            final int radiologistNumber = i;
 
-                    UserEntity.builder()
-                            .name("Radiologist " + i)
-                            .staffId(String.format("RAD-%04d", i))
-                            .phoneNumber(String.format("930000000%d", i))
-                            .email("radiologist" + i + "@hospital.com")
-                            .password(passwordEncoder.encode("radiology123"))
-                            .role(Role.RADIOLOGIST)
-                            .isActive(true)
-                            .build()
+            String staffId = String.format("RAD-%04d", radiologistNumber);
 
-            );
+            UserEntity user = userRepository
+                    .findByStaffId(staffId)
+                    .orElseGet(() -> {
+
+                        UserEntity newUser = UserEntity.builder()
+                                .name("Radiologist " + radiologistNumber)
+                                .staffId(staffId)
+                                .phoneNumber(String.format("930000000%d", radiologistNumber))
+                                .email("radiologist" + radiologistNumber + "@hospital.com")
+                                .password(passwordEncoder.encode("radiology123"))
+                                .role(Role.RADIOLOGIST)
+                                .isActive(true)
+                                .build();
+
+                        UserEntity saved = userRepository.save(newUser);
+
+                        log.info("Created RADIOLOGIST - {}", saved.getName());
+
+                        return saved;
+                    });
+
+            // Create profile if it doesn't already exist
+            if (radiologistProfileRepository.findByUserId(user.getId()).isEmpty()) {
+
+                RadiologistProfileEntity radiologistProfile = RadiologistProfileEntity.builder()
+                        .user(user)
+                        .specialization("Radiology")
+                        .qualification("MBBS")
+                        .experienceInYears(radiologistNumber * 2)
+                        .build();
+
+                radiologistProfileRepository.save(radiologistProfile);
+
+                log.info("Created radiologist profile for {}", staffId);
+            }
         }
     }
 
