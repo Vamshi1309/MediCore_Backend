@@ -13,6 +13,8 @@ import com.vamshi.HospitalManagementSystem.doctor.repositories.DoctorProfileRepo
 import com.vamshi.HospitalManagementSystem.exceptions.ResourceNotFoundException;
 import com.vamshi.HospitalManagementSystem.user.entities.UserEntity;
 import com.vamshi.HospitalManagementSystem.user.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +25,8 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorProfileRepository doctorRepository;
 
     private final UserRepository userRepository;
+
+    private static final Logger log = LoggerFactory.getLogger(DoctorServiceImpl.class);
 
     // private final UserRepository userRepository;
 
@@ -42,6 +46,11 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public DoctorProfileResponse updateMyProfile(UpdateDoctorProfileRequest request) {
         UserEntity user = authUtil.getLoggedInUser();
+
+        log.info("===== PROFILE UPDATE DEBUG =====");
+        log.info("Logged-in user ID: {}", user.getId());
+        log.info("Existing email: {}", user.getEmail());
+        log.info("Requested email: {}", request.getEmail());
 
         DoctorProfileEntity doctor = doctorRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with that Id"));
